@@ -130,21 +130,27 @@ def plot_times_counts(t, cs):
     x = np.linspace(0, 4, 1000)
 
     m, b, sy, sm, sb, r = pl.lsq(t, np.log(cs))
+
     plt.figure()
     plt.plot(t, np.log(cs), 'r.')
-    plt.plot(x, m*x + b, 'b-')
+    plt.plot(x, m*x + b, 'b-', label=('$r=%f$' % (r)))
+
     plt.xlabel('Time (minutes)')
     plt.ylabel('$\log($Counts per 0.5min$)$')
+    plt.legend(loc='upper right')
 
 def plot_thickness_intensity(T, I, xmin, xmax):
     x = np.linspace(xmin, xmax, 1000)
 
     m, b, sy, sm, sb, r = pl.lsq(T, np.log(I))
+
     plt.figure()
     plt.plot(T, np.log(I), 'r.')
-    plt.plot(x, m*x + b, c=np.random.rand(3,1))
+    plt.plot(x, m*x + b, c=np.random.rand(3,1), label=('$r=%f$' % (r)))
+
     plt.xlabel('Thickness (mg/cm$^2$)')
     plt.ylabel('$\log($Intensity$)$')
+    plt.legend(loc='upper right')
 
 
 #############################################################
