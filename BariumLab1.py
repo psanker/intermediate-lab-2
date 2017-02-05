@@ -185,9 +185,9 @@ print('CMB Counts/min: %1.0f ± %1.0f' % (np.floor(mu_cpm_cmb), np.floor(s_cpm_c
 
 # Ok now to draw some shit
 plot_volts_cps(hv_test_volts, hv_test_cps)
-plot_times_counts(ba_times, ba_counts)
-
 plot_cpm_counts(cpm_cmb)
+
+plot_times_counts(ba_times, ba_counts - (mu_cpm_cmb / 2.)) # correction for CMB
 
 plot_thickness_intensity(abs_thicknessBeta, beta_intensity, 0, 450)
 plot_thickness_intensity(abs_thicknessGamma[0:10], gamma_intensity[0:10], 0, 360)
