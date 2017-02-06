@@ -16,7 +16,6 @@ from matplotlib import mlab
 import decimal as dec
 
 from scipy.optimize import curve_fit
-import psalib as pl
 
 # Allows LaTeX output in Jupyter and in matplotlib
 init_printing(use_latex=True, use_unicode=True)
@@ -130,7 +129,7 @@ def plot_cpm_counts(arr):
 def plot_times_counts(t, cs):
     x = np.linspace(0, 4, 1000)
 
-    m, b, sy, sm, sb, r = pl.lsq(t, np.log(cs))
+    m, b, sy, sm, sb, r = lsq(t, np.log(cs))
 
     plt.figure()
     plt.plot(t, np.log(cs), 'r.')
@@ -143,7 +142,7 @@ def plot_times_counts(t, cs):
 def plot_thickness_intensity(T, I, xmin, xmax):
     x = np.linspace(xmin, xmax, 1000)
 
-    m, b, sy, sm, sb, r = pl.lsq(T, np.log(I))
+    m, b, sy, sm, sb, r = lsq(T, np.log(I))
 
     plt.figure()
     plt.plot(T, np.log(I), 'r.')
