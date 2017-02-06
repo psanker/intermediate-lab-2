@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #############################################################
 #
 # lab1 analysis
@@ -168,20 +169,20 @@ counts_cmb    = np.array([49, 50, 55, 48, 45])
 ba_times  = np.array([0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])
 ba_counts = np.array([163, 138, 137, 114, 103, 88, 86, 80, 67])
 
-times_beta_abs  = np.array([.45, .43, .48, .45, .56, .59, .64, .73, .95, 1.16, 1.85, 3.04]) #in minutes
+times_beta_abs  = np.array([.42, .45, .43, .48, .45, .56, .59, .64, .73, .95, 1.16, 1.85, 3.04]) #in minutes
 beta_intensity  = 1./times_beta_abs #inverse minutes
 
-times_gamma_abs = np.array([.66, .72, .65, .7, .61, .61, .61, .54, .64, .57, .62, .58, .64, .65, .72, .77, .89])
+times_gamma_abs = np.array([.62, .66, .72, .65, .7, .61, .61, .61, .54, .64, .57, .62, .58, .64, .65, .72, .77, .89])
 gamma_intensity = 1./times_gamma_abs
 
-abs_thicknessGamma = np.array([4.5, 6.5, 14.1, 28.1, 59.1, 102, 129, 161, 206, 258, 328, 419, 516, 849, 1890, 3632, 7435]) #mg/cm^2
-abs_thicknessBeta  = abs_thicknessGamma[0:12]
+abs_thicknessGamma = np.array([0, 4.5, 6.5, 14.1, 28.1, 59.1, 102, 129, 161, 206, 258, 328, 419, 516, 849, 1890, 3632, 7435]) #mg/cm^2
+abs_thicknessBeta  = abs_thicknessGamma[0:13]
 
 # Print expected CMB cpm
 cpm_cmb    = counts_cmb / 2
 mu_cpm_cmb = np.mean(cpm_cmb)
 s_cpm_cmb  = np.std(cpm_cmb)
-print('CMB Counts/min: %1.0f ± %1.0f' % (np.floor(mu_cpm_cmb), np.floor(s_cpm_cmb)))
+# print('CMB Counts/min: %1.0f ± %1.0f' % (np.floor(mu_cpm_cmb), np.floor(s_cpm_cmb)))
 
 # Ok now to draw some shit
 plot_volts_cps(hv_test_volts, hv_test_cps)
@@ -190,10 +191,10 @@ plot_cpm_counts(cpm_cmb)
 plot_times_counts(ba_times, ba_counts - (mu_cpm_cmb / 2.)) # correction for CMB
 
 plot_thickness_intensity(abs_thicknessBeta, beta_intensity, 0, 450)
-plot_thickness_intensity(abs_thicknessGamma[0:10], gamma_intensity[0:10], 0, 360)
+plot_thickness_intensity(abs_thicknessGamma[0:11], gamma_intensity[0:11], 0, 360)
 
 #I broke up the gamma into two because the trend doesn't show until the last few data points
-plot_thickness_intensity(abs_thicknessGamma[11:], gamma_intensity[11:], 390, 7470)
+plot_thickness_intensity(abs_thicknessGamma[12:], gamma_intensity[12:], 390, 7470)
 
 # All plots at once!
 plt.show()
