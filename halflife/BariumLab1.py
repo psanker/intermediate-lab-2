@@ -13,6 +13,7 @@ from astropy import units as u
 from astropy import constants as const
 from sympy import *
 from matplotlib import mlab
+from matplotlib import patches
 import decimal as dec
 
 from scipy.optimize import curve_fit
@@ -74,7 +75,6 @@ def lsq(x, y):
 
 def power_fit(x, y, n):
     assert len(x) == len(y), 'Array dimensions do not match'
-    n = float(len(x)) # Don't lose precision with int * float multiplication
 
     # compute covariance matrix and correlation coefficient of data
     cov  = np.cov(x, y)
@@ -83,15 +83,15 @@ def power_fit(x, y, n):
     sxy  = cov[0][1]
     r    = sxy / (np.sqrt(vary) * np.sqrt(varx))
 
-    f    = lambda x, *p: p[0]*np.power((x - p[1]), n) + p[2]
-    pars = [1, 1, 1]
+    f    = lambda x, *p: p[0]*((x - p[1])**n)
+    pars = [1, 1]
 
     pvals, pcov = curve_fit(f, x, y, p0=pars)
 
-    A, x0, y0 = pvals
+    A, x0 = pvals
 
-    # y = A*(x - x0)^n + y0; r is correlation
-    return A, x0, y0, r
+    # y = A*x^n + y0; r is correlation
+    return A, x0, r
 
 #############################################################
 # 4. Lab-Specific Functions
@@ -167,6 +167,27 @@ def plot_half_life(lam, dlam):
     plt.xlabel('Time (min)')
     plt.legend(loc='upper right')
 
+def plot_interference(dis, counts, cmb_mu):
+    cmbmu = 0.1 * cmb_mu # correction from cpm to cp(0.1m)
+    dl    = 0.5
+
+    plt.errorbar(dis, counts, xerr=dl, fmt='.', color='r')
+    plt.axhline(cmbmu, ls='--', color='k', label='Background range')
+
+    plt.axes().add_patch(
+        patches.Rectangle(
+            (-10, 0),
+            60,
+            cmbmu,
+            hatch='\\',
+            fill=False
+        )
+    )
+
+    plt.xlabel('Distance ($cm$)')
+    plt.ylabel('Counts per 0.1 sec')
+    plt.legend(loc='upper right')
+
 #############################################################
 # 6. Program Main
 #
@@ -181,6 +202,11 @@ counts_cmb    = np.array([49, 50, 55, 48, 45])
 # Barium decay results
 ba_times  = np.array([0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0])
 ba_counts = np.array([163, 138, 137, 114, 103, 88, 86, 80, 67])
+
+# distance vs. source interference
+# each dl was ~0.5cm
+interference_distance = np.array([0, 5, 10, 15, 20, 25, 30, 35, 40, 45]) # cm
+interference_counts   = np.array([24, 12, 9, 7, 3, 3, 3, 1, 1, 3])       # counts per 0.1min
 
 times_beta_abs  = np.array([.42, .45, .43, .48, .45, .56, .59, .64, .73, .95, 1.16, 1.85, 3.04]) #in minutes
 beta_intensity  = 1./times_beta_abs #inverse minutes
@@ -200,6 +226,8 @@ s_cpm_cmb  = np.std(cpm_cmb)
 # Ok now to draw some shit
 plot_volts_cps(hv_test_volts, hv_test_cps)
 plot_cpm_counts(cpm_cmb)
+
+plot_interference(interference_distance, interference_counts, mu_cpm_cmb + s_cpm_cmb)
 
 lam, dlam = plot_times_counts(ba_times, ba_counts - (mu_cpm_cmb / 2.)) # correction for CMB
 plot_half_life(lam, dlam)
