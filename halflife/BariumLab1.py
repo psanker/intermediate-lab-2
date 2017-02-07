@@ -139,6 +139,8 @@ def plot_times_counts(t, cs):
     plt.ylabel('$\log($Counts per 0.5min$)$')
     plt.legend(loc='upper right')
 
+    return m, sm
+
 def plot_thickness_intensity(T, I, xmin, xmax):
     x = np.linspace(xmin, xmax, 1000)
 
@@ -152,6 +154,18 @@ def plot_thickness_intensity(T, I, xmin, xmax):
     plt.ylabel('$\log($Intensity$)$')
     plt.legend(loc='upper right')
 
+def plot_half_life(lam, dlam):
+    mu  = np.log(2) / np.abs(lam)
+    s   = (np.log(2) * dlam) / (np.abs(lam))**2
+
+    x = np.linspace(mu-(4*s), mu+(4*s), 1000)
+
+    plt.figure()
+    plt.plot(x, mlab.normpdf(x, mu, s), 'b-', label='Computed')
+
+    plt.axvline(2.55, label='Theoretical', ls='--', color='k')
+    plt.xlabel('Time (min)')
+    plt.legend(loc='upper right')
 
 #############################################################
 # 6. Program Main
@@ -187,7 +201,8 @@ s_cpm_cmb  = np.std(cpm_cmb)
 plot_volts_cps(hv_test_volts, hv_test_cps)
 plot_cpm_counts(cpm_cmb)
 
-plot_times_counts(ba_times, ba_counts - (mu_cpm_cmb / 2.)) # correction for CMB
+lam, dlam = plot_times_counts(ba_times, ba_counts - (mu_cpm_cmb / 2.)) # correction for CMB
+plot_half_life(lam, dlam)
 
 plot_thickness_intensity(abs_thicknessBeta, beta_intensity, 0, 450)
 plot_thickness_intensity(abs_thicknessGamma[0:11], gamma_intensity[0:11], 0, 360)
