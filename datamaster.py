@@ -55,7 +55,7 @@ def get_var(var):
         obj = current_labs[selected_lab]
 
         try:
-            return getattr(obj, ('get_%s' % (var)))()
+            print(getattr(obj, ('get_%s' % (var)))())
         except Exception as err:
             print(str(err))
     else:
