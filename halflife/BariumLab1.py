@@ -97,9 +97,8 @@ def power_fit(x, y, n):
 # 4. Lab-Specific Functions
 #############################################################
 
-#
-# Any extra random stuff should go here
-#
+def get_s_distance(val, mu, s):
+    return (val - mu) / s
 
 #############################################################
 # 5. Plotting Functions
@@ -167,10 +166,14 @@ def plot_half_life(lam, dlam):
     plt.xlabel('Time (min)')
     plt.legend(loc='upper right')
 
+    print('Half-life: %f±%f' % (mu, s))
+    print('Half-life difference from theory: %f' % (get_s_distance(2.55, mu, s)))
+
 def plot_interference(dis, counts, cmb_mu):
     cmbmu = 0.1 * cmb_mu # correction from cpm to cp(0.1m)
     dl    = 0.5
 
+    plt.figure()
     plt.errorbar(dis, counts, xerr=dl, fmt='.', color='r')
     plt.axhline(cmbmu, ls='--', color='k', label='Background range')
 
@@ -221,6 +224,7 @@ abs_thicknessBeta  = abs_thicknessGamma[0:13]
 cpm_cmb    = counts_cmb / 2
 mu_cpm_cmb = np.mean(cpm_cmb)
 s_cpm_cmb  = np.std(cpm_cmb)
+# print('CMB Counts/min: %f ± %f' % (mu_cpm_cmb, s_cpm_cmb))
 # print('CMB Counts/min: %1.0f ± %1.0f' % (np.floor(mu_cpm_cmb), np.floor(s_cpm_cmb)))
 
 # Ok now to draw some shit
@@ -230,6 +234,7 @@ plot_cpm_counts(cpm_cmb)
 plot_interference(interference_distance, interference_counts, mu_cpm_cmb + s_cpm_cmb)
 
 lam, dlam = plot_times_counts(ba_times, ba_counts - (mu_cpm_cmb / 2.)) # correction for CMB
+print('λ: %f±%f Hz' % (-1.*lam, dlam))
 plot_half_life(lam, dlam)
 
 plot_thickness_intensity(abs_thicknessBeta, beta_intensity, 0, 450)
