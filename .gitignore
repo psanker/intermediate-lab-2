@@ -2,3 +2,4 @@ __pycache__
 
 # Stupid OSX indexing files
 *.DS_Store
+*.pyc
