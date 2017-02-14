@@ -77,8 +77,8 @@ def get_var(var):
         usage()
 
 def usage():
-    print('python <DataMaster> -s <name> [-g, -p] <data name>')
-    print('\t-h, --help: Prints out this help section')
+    print('Usage: datamaster.py -s <name> [-g, -p] <data name>')
+    print('\nCommands:\n\t-h, --help: Prints out this help section')
     print('\t-s, --select <name>: Selects lab to compute data from')
     print('\t-p, --plot <variable>: Calls a plotting function of form \"plot_<variable>\"')
     print('\t-g, --get <variable>: Prints out a value from function of form \"get_<variable>\"')
