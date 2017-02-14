@@ -86,7 +86,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, 'hs:p:g:', ['help', 'select=', 'plot=', 'get='])
     except getopt.GetoptError as err:
-        print('u dun fuqd up')
+        usage()
         sys.exit(2)
 
     for opt, arg in opts:
