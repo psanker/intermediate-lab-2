@@ -89,9 +89,14 @@ def main(argv):
         usage()
         sys.exit(2)
 
+    if len(opts) == 0:
+        usage()
+        return
+
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
+            return
         elif opt in ('-s', '--select'):
             select_lab(arg)
         elif opt in ('-p', '--plot'):
