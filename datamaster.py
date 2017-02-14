@@ -3,14 +3,16 @@
 # an attempt to unify all the lab scripts into one executable so that we don't need to
 # rewrite old code and shit
 
-import sys, getopt
+import sys
+import getopt
+from importlib import import_module
 
 # Allows LaTeX output in Jupyter and in matplotlib
 # Importing this because it may be an environmental trigger
 from sympy import init_printing
 init_printing(use_latex=True, use_unicode=True)
 
-LABS         = ['halflife', 'michelson']
+LABS = ['halflife', 'michelson', 'photoelectric']
 
 current_labs = {}
 selected_lab = None
@@ -31,37 +33,73 @@ def fetch_lab(name):
         obj = current_labs[name]
     else:
         try:
-            obj = import ('%s/lab' % (name))
+            obj = __import__(name)
+            current_labs[name] = obj
         except Exception as err:
             print('Lab analysis script not found')
             print(str(err))
 
     return obj
 
+
+def select_lab(name):
+    lab = fetch_lab(name)
+
+    if lab is not None:
+        global selected_lab
+        selected_lab = name
+        print('Selected Lab: %s\n' % (selected_lab))
+
+
 def plot_var(var):
     if selected_lab is not None:
         obj = current_labs[selected_lab]
 
         try:
-            getattr(obj, ('plot_%s' % (var)))()
+            getattr(obj.lab, ('plot_%s' % (var)))()
         except Exception as err:
             print(str(err))
     else:
         print('No selected lab')
         usage()
+
 
 def get_var(var):
     if selected_lab is not None:
         obj = current_labs[selected_lab]
 
         try:
-            print(getattr(obj, ('get_%s' % (var)))())
+            print(getattr(obj.lab, ('get_%s' % (var)))())
         except Exception as err:
             print(str(err))
     else:
         print('No selected lab')
         usage()
-        return None
 
 def usage():
-    # print a list of commands available with examples
+    print('python <DataMaster> -s <name> [-g, -p] <data name>')
+    print('\t-h, --help: Prints out this help section')
+    print('\t-p, --plot <variable>: Calls a plotting function of form \"plot_<variable>\"')
+    print('\t-g, --get <variable>: Prints out a value from function of form \"get_<variable>\"')
+
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, 'hs:p:g:', ['help', 'select=', 'plot=', 'get='])
+    except getopt.GetoptError as err:
+        print('u dun fuqd up')
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+        elif opt in ('-s', '--select'):
+            select_lab(arg)
+        elif opt in ('-p', '--plot'):
+            plot_var(arg)
+        elif opt in ('-g', '--get'):
+            get_var(arg)
+        else:
+            usage()
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
