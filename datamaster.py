@@ -34,7 +34,7 @@ def fetch_lab(name, load):
     elif name in current_labs and load:
         try:
             unload_lab(name)
-            
+
             obj = load_lab(name)
             current_labs[name] = obj
         except Exception as err:
@@ -146,7 +146,6 @@ def handle_args(args):
         opts, args = getopt.getopt(args, 'hs:rp:g:e', ['help', 'reload', 'select=', 'plot=', 'get=', 'exit'])
     except getopt.GetoptError as err:
         usage()
-        sys.exit(2)
 
     for opt, arg in opts:
         if opt in ('-h', '--help'):
