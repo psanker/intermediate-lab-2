@@ -91,14 +91,12 @@ def cli():
 
     legacy = False
 
-    try:
-        eval('1 if True else 2')
-    except Exception as err:
+    if sys.version_info < (3, 0):
         legacy = True
 
     while cli_thread:
         if legacy:
-            # Py ≤ 2.7 
+            # Py ≤ 2.7
             args = str(raw_input('> ')).split(' ')
             handle_args(args)
         else:
