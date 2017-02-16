@@ -76,15 +76,41 @@ def lsq(x, y):
 # 4. Data
 #############################################################
 
+# 4358 Wavelength
+
 wavelength_4358_V_1 = np.array([0, .68, .78, .85, .95, 1.05, 1.15, 1.25, 1.35, 1.45, 1.55, 1.65, 1.75, 1.85])
 wavelength_4358_d_1 = np.array([-60, 3, 5, 6, 7, 8, 8, 9, 9, 9, 9, 9, 9, 9])
 
 wavelength_4358_V_2 = np.array([0, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8])
 wavelength_4358_d_2 = np.array([-61, -5, 0, 3, 5, 7, 8, 8, 8, 9, 9, 9, 9, 9, 9])
 
+  # Appended for complete data set
+wavelength_4358_V = np.append(wavelength_4358_V_1, wavelength_4358_V_2)
+wavelength_4358_d = np.append(wavelength_4358_d_1, wavelength_4358_d_2)
+
+# 546 Wavelength
+
+wavelength_546_V_1 = np.array([0, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4])
+wavelength_546_d_1 = np.array([-23, -10, -5, -1, 0, 1, 1.5, 2, 2, 2, 2, 2, 2, 2])
+
+wavelength_546_V_2 = np.array([0, .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4])
+wavelength_546_d_2 = np.array([-21, -10, -5, -1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2])
+
 # Appended for complete data set
-wavelength_4358_V   = np.append(wavelength_4358_V_1, wavelength_4358_V_2)
-wavelength_4358_d   = np.append(wavelength_4358_d_1, wavelength_4358_d_2)
+wavelength_546_V = np.append(wavelength_546_V_1, wavelength_546_V_2)
+wavelength_546_d = np.append(wavelength_546_d_1, wavelength_546_d_2)
+
+# 577 Wavelength -- The two runs are identical
+
+wavelength_577_V_1 = np.array([0, .2, .3, .4, .5, .6, .7, .8, .9, 1.0])
+wavelength_577_d_1 = np.array([-5, -2, -1, 0, 0, 0, 0, 0, 0, 0])
+
+wavelength_577_V_2 = np.array([0, .2, .3, .4, .5, .6, .7, .8, .9, 1.0])
+wavelength_577_d_2 = np.array([-5, -2, -1, 0, 0, 0, 0, 0, 0, 0])
+# Appended for complete data set
+wavelength_577_V = np.append(wavelength_577_V_1, wavelength_577_V_2)
+wavelength_577_d = np.append(wavelength_577_d_1, wavelength_577_d_2)
+
 
 #############################################################
 # 5. Lab-specific functions
