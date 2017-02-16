@@ -86,12 +86,48 @@ wavelength_4358_d_2 = np.array([-61, -5, 0, 3, 5, 7, 8, 8, 8, 9, 9, 9, 9, 9, 9])
 wavelength_4358_V   = np.append(wavelength_4358_V_1, wavelength_4358_V_2)
 wavelength_4358_d   = np.append(wavelength_4358_d_1, wavelength_4358_d_2)
 
+#############################################################
+# 5. Lab-specific functions
+#############################################################
+
+def exponential_limit_fit(x, y):
+    assert len(x) == len(y), 'Array dimensions do not match'
+
+    # compute covariance matrix and correlation coefficient of data
+    cov  = np.cov(x, y)
+    varx = cov[0][0]
+    vary = cov[1][1]
+    sxy  = cov[0][1]
+    r    = sxy / (np.sqrt(vary) * np.sqrt(varx))
+
+    # lambda expression for a line
+    # dummy parameter array of [1, 1]
+    f    = lambda x, *p: p[0] - p[1]*np.exp(-1*p[2]*x)
+    pars = [1, 1, 1]
+
+    pvals, pcov = curve_fit(f, x, y, p0=pars)
+
+    A, B, l = pvals
+
+    sA = np.sqrt(pcov[0][0])
+    sB = np.sqrt(pcov[1][1])
+    sl = np.sqrt(pcov[2][2])
+
+    return A, sA, B, sB, l, sl, r
+
 def plot_4358():
-    m, b, sy, sm, sb, r = lsq(wavelength_4358_V,wavelength_4358_d)
+    A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_4358_V,wavelength_4358_d)
 
     x = np.linspace(0, 1.9, 1000)
 
     plt.figure()
     plt.plot(wavelength_4358_V, wavelength_4358_d, 'r.')
-    plt.plot(x, m*x + b, 'b--')
+    plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label=('r= %f' % (r)))
+
+    plt.xlabel('Voltage ($V$)')
+    plt.ylabel('Deflection ($mm$)')
+    plt.legend(loc='upper left')
+
+    plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f±%f\n$B=$%f±%f\n$\\lambda=$%f±%f' % (A, sA, B, sB, l, sl), xy=(1, 5), xytext=(1, -20), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+
     plt.show()

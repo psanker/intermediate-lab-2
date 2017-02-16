@@ -7,6 +7,7 @@ import signal
 import sys
 import getopt
 from importlib import import_module
+from importlib import reload as rel # Prevent cross definitions
 
 # Allows LaTeX output in Jupyter and in matplotlib
 # Importing this because it may be an environmental trigger
@@ -20,7 +21,6 @@ LABS = ['halflife', 'michelson', 'photoelectric']
 current_labs = {}
 selected_lab = None
 
-
 def fetch_lab(name, load):
     obj = None
 
@@ -31,16 +31,46 @@ def fetch_lab(name, load):
     if name in current_labs and not load:
         print('%s loaded from memory' % (name))
         obj = current_labs[name]
-    else:
+    elif name in current_labs and load:
         try:
-            obj = __import__(name)
+            unload_lab(name)
+            
+            obj = load_lab(name)
             current_labs[name] = obj
         except Exception as err:
-            print('Lab analysis script not found')
+            print('Reload of lab failed')
             print(str(err))
+    else:
+        obj = load_lab(name)
+        current_labs[name] = obj
 
     return obj
 
+def load_lab(name):
+    obj = None
+
+    try:
+        obj = __import__(name)
+        current_labs[name] = obj
+    except Exception as err:
+        print('Lab analysis script not found')
+        print(str(err))
+
+    return obj
+
+def unload_lab(name):
+    # this is so dirty I feel so uncomfortable
+    rm = []
+
+    for mod in sys.modules.keys():
+        if mod.startswith('%s.' % (name)):
+            rm.append(mod)
+
+    for i in rm:
+        del sys.modules[i]
+
+    del sys.modules[name]
+    del current_labs[name]
 
 def select_lab(name, load=False):
     lab = fetch_lab(name, load)
