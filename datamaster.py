@@ -21,14 +21,15 @@ current_labs = {}
 selected_lab = None
 
 
-def fetch_lab(name):
+def fetch_lab(name, load):
     obj = None
 
     if name not in LABS:
         print('Invalid lab name')
         return
 
-    if name in current_labs:
+    if name in current_labs and not load:
+        print('%s loaded from memory' % (name))
         obj = current_labs[name]
     else:
         try:
@@ -41,8 +42,8 @@ def fetch_lab(name):
     return obj
 
 
-def select_lab(name):
-    lab = fetch_lab(name)
+def select_lab(name, load=False):
+    lab = fetch_lab(name, load)
 
     if lab is not None:
         global selected_lab
@@ -80,6 +81,7 @@ def usage():
     print('Usage: datamaster.py -s <name> [-g, -p] <data name>')
     print('\nCommands:\n\t-h, --help: Prints out this help section')
     print('\t-s, --select <name>: Selects lab to compute data from')
+    print('\t-r, --reload: Reloads the selected lab from file')
     print('\t-p, --plot <variable>: Calls a plotting function of form \"plot_<variable>\"')
     print('\t-g, --get <variable>: Prints out a value from function of form \"get_<variable>\"')
     print('\t-e, --exit: Explicit command to exit from DataMaster CLI')
@@ -100,7 +102,7 @@ def exit_handle(sig, frame):
 
 def handle_args(args):
     try:
-        opts, args = getopt.getopt(args, 'hs:p:g:e', ['help', 'select=', 'plot=', 'get=', 'exit'])
+        opts, args = getopt.getopt(args, 'hs:rp:g:e', ['help', 'reload', 'select=', 'plot=', 'get=', 'exit'])
     except getopt.GetoptError as err:
         usage()
         sys.exit(2)
@@ -111,6 +113,12 @@ def handle_args(args):
             return
         elif opt in ('-s', '--select'):
             select_lab(arg)
+        elif opt in ('-r', '--reload'):
+            if selected_lab is not None:
+                select_lab(selected_lab, True)
+            else:
+                print('No selected lab to reload')
+                return
         elif opt in ('-p', '--plot'):
             plot_var(arg)
         elif opt in ('-g', '--get'):
