@@ -145,7 +145,9 @@ def handle_args(args):
     try:
         opts, args = getopt.getopt(args, 'hs:rp:g:e', ['help', 'reload', 'select=', 'plot=', 'get=', 'exit'])
     except getopt.GetoptError as err:
+        print(str(err))
         usage()
+        return
 
     for opt, arg in opts:
         if opt in ('-h', '--help'):

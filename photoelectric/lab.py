@@ -206,6 +206,23 @@ def plot_4358():
 
     plt.show()
 
+def plot_4358_corrected():
+    A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_4358_V, wavelength_4358_d)
+    lim                    = find_limit_asymptote(wavelength_4358_V, wavelength_4358_d, tolerance=0.05)
+
+    x = np.linspace(0, 1.9, 1000)
+
+    plt.figure()
+    plt.plot(wavelength_4358_V, wavelength_4358_d, 'r.', label='True data')
+
+    plt.plot(x, -1*(A+B*np.exp(-1*l*x)) - (-1*(lim[0]*x + lim[1])), 'b-', label='Corrected current')
+
+    plt.xlabel('Voltage ($V$)')
+    plt.ylabel('Deflection ($mm$)')
+    plt.legend(loc='lower right')
+
+    plt.show()
+
 def plot_546():
     A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_546_V, wavelength_546_d)
     lim                    = find_limit_asymptote(wavelength_546_V, wavelength_546_d, tolerance=1)
