@@ -9,6 +9,9 @@ import getopt
 from importlib import import_module
 from importlib import reload as rel # Prevent cross definitions
 
+# importing matplotlib so datamaster prints all requested plots at once
+import matplotlib.pyplot as plt
+
 # Allows LaTeX output in Jupyter and in matplotlib
 # Importing this because it may be an environmental trigger
 from sympy import init_printing
@@ -87,11 +90,13 @@ def plot_var(var):
 
         try:
             getattr(obj.lab, ('plot_%s' % (var)))()
+            return True
         except Exception as err:
             print(str(err))
     else:
         print('No selected lab')
         usage()
+        return False
 
 
 def get_var(var):
@@ -118,7 +123,6 @@ def usage():
 
 
 def cli():
-
     legacy = False
 
     if sys.version_info < (3, 0):
@@ -149,6 +153,8 @@ def handle_args(args):
         usage()
         return
 
+    plotting = False
+
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
@@ -162,7 +168,8 @@ def handle_args(args):
                 print('No selected lab to reload')
                 return
         elif opt in ('-p', '--plot'):
-            plot_var(arg)
+            if plot_var(arg):
+                plotting = True
         elif opt in ('-g', '--get'):
             get_var(arg)
         elif opt in ('-e', '--exit'):
@@ -170,6 +177,9 @@ def handle_args(args):
             sys.exit(0)
         else:
             usage()
+
+    if plotting:
+        plt.show()
 
 def main(argv):
     if len(argv) == 0:

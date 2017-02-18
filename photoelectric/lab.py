@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #############################################################
-# 1. Imp-orts
+# 1. Imports
 #############################################################
 
 import numpy as np
@@ -204,8 +204,6 @@ def plot_4358():
     plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f±%f\n$B=$%f±%f\n$\\lambda=$%f±%f' % (A, sA, B, sB, l, sl), xy=(1, 5), xytext=(1, -20), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('$y=mx + b$\n$m=$%f±%f\n$b=$%f±%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 6), xytext=(0.5, -35), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
 
-    plt.show()
-
 def plot_4358_corrected():
     A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_4358_V, wavelength_4358_d)
     lim                    = find_limit_asymptote(wavelength_4358_V, wavelength_4358_d, tolerance=0.05)
@@ -220,8 +218,6 @@ def plot_4358_corrected():
     plt.xlabel('Voltage ($V$)')
     plt.ylabel('Deflection ($mm$)')
     plt.legend(loc='lower right')
-
-    plt.show()
 
 def plot_546():
     A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_546_V, wavelength_546_d)
@@ -241,5 +237,3 @@ def plot_546():
 
     plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f±%f\n$B=$%f±%f\n$\\lambda=$%f±%f' % (A, sA, B, sB, l, sl), xy=(0.8, 1), xytext=(0.8, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('$y=mx + b$\n$m=$%f±%f\n$b=$%f±%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 1), xytext=(0.3, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
-
-    plt.show()
