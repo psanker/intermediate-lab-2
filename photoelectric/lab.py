@@ -42,6 +42,7 @@ m_e  = const.m_e
 m_n  = const.m_n
 m_p  = const.m_p
 R_H  = 2.18e-18 * u.J
+q_e  = const.e
 
 ZERO = 0.00001
 
@@ -162,7 +163,7 @@ wavelength_577_V_1 = np.array([ZERO, .2, .3, .4, .5, .6, .7, .8, .9, 1.0])
 wavelength_577_d_1 = np.array([-5, -2, -1, -0.5, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
 
 wavelength_577_V_2 = np.array([ZERO, .2, .3, .4, .5, .6, .7, .8, .9, 1.0])
-wavelength_577_d_2 = np.array([-5, -2, -1, -0.5, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+wavelength_577_d_2 = np.array([-5, -2, -1, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
 # Appended for complete data set
 wavelength_577_V = np.append(wavelength_577_V_1, wavelength_577_V_2)
 wavelength_577_d = np.append(wavelength_577_d_1, wavelength_577_d_2)
@@ -179,7 +180,7 @@ def find_limit_asymptote(x, y, tolerance=0.05):
 
     assert len(x) == len(y), 'Array dimensions do not match'
 
-    m, b, sy, sm, sb, r = (0, 0, 0, 0, 0, 0)
+    m, b, sy, sm, sb, r = (0., 0., 0., 0., 0., 0.)
     run = True
 
     set_x = x
@@ -227,7 +228,7 @@ def find_stopping_potential(x, y, tolerance=[1, 0.5, 0.25], limtol=0.05):
                 voltage_guess[i] = xset[j]
                 break
 
-    return [np.mean(voltage_guess), np.std(voltage_guess)]
+    return voltage_guess
 
 def get_stop_4358():
     return find_stopping_potential(wavelength_4358_V, wavelength_4358_d)
@@ -236,9 +237,11 @@ def plot_4358():
     A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_4358_V, wavelength_4358_d)
     lim                    = find_limit_asymptote(wavelength_4358_V, wavelength_4358_d, tolerance=0.05)
 
-    stopping_potential     = find_stopping_potential(wavelength_4358_V, wavelength_4358_d)
+    sp    = find_stopping_potential(wavelength_4358_V, wavelength_4358_d)
+    sp_mu = np.mean(sp)
+    sp_s  = np.std(sp)
 
-    x = np.linspace(0, 1.9, 1000)
+    x  = np.linspace(0, 1.9, 1000)
 
     plt.figure()
     plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label=('Current'))
@@ -247,7 +250,7 @@ def plot_4358():
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
 
     plt.errorbar(wavelength_4358_V, wavelength_4358_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
-    plt.errorbar(stopping_potential[0], A - B*np.exp(-1*l*stopping_potential[0]), xerr=stopping_potential[1], yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (stopping_potential[0], stopping_potential[1])))
+    plt.errorbar(sp_mu, A - B*np.exp(-1*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (sp_mu, sp_s)))
 
     plt.xlabel('Voltage ($V$)')
     plt.ylabel('Deflection ($mm$)')
@@ -281,9 +284,11 @@ def plot_546():
     A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_546_V, wavelength_546_d)
     lim                    = find_limit_asymptote(wavelength_546_V, wavelength_546_d, tolerance=1)
 
-    stopping_potential     = find_stopping_potential(wavelength_546_V, wavelength_546_d, tolerance=[1, 0.75, 0.5], limtol=1)
+    sp    = find_stopping_potential(wavelength_546_V, wavelength_546_d, limtol=1)
+    sp_mu = np.mean(sp)
+    sp_s  = np.std(sp)
 
-    x = np.linspace(0, 1.4, 1000)
+    x     = np.linspace(0, 1.4, 1000)
 
     plt.figure()
     plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label='Current')
@@ -292,7 +297,7 @@ def plot_546():
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
 
     plt.errorbar(wavelength_546_V, wavelength_546_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
-    plt.errorbar(stopping_potential[0], A - B*np.exp(-1*l*stopping_potential[0]), xerr=stopping_potential[1], yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (stopping_potential[0], stopping_potential[1])))
+    plt.errorbar(sp_mu, A - B*np.exp(-1*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (sp_mu, sp_s)))
 
     plt.xlabel('Voltage ($V$)')
     plt.ylabel('Deflection ($mm$)')
@@ -307,9 +312,11 @@ def plot_577():
     A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_577_V, wavelength_577_d)
     lim                    = find_limit_asymptote(wavelength_577_V, wavelength_577_d, tolerance=1)
 
-    stopping_potential     = find_stopping_potential(wavelength_577_V, wavelength_577_d, tolerance=[1., 0.75, 0.5], limtol=1)
+    sp    = find_stopping_potential(wavelength_577_V, wavelength_577_d, limtol=1, tolerance=[1, 0.75, 0.5])
+    sp_mu = np.mean(sp)
+    sp_s  = np.std(sp)
 
-    x = np.linspace(0, 1.0, 1000)
+    x     = np.linspace(0, 1.0, 1000)
 
     plt.figure()
     plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label='Current')
@@ -318,8 +325,71 @@ def plot_577():
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
 
     plt.errorbar(wavelength_577_V, wavelength_577_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
-    plt.errorbar(stopping_potential[0], A - B*np.exp(-1.*l*stopping_potential[0]), xerr=stopping_potential[1], yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (stopping_potential[0], stopping_potential[1])))
+    plt.errorbar(sp_mu, A - B*np.exp(-1.*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (sp_mu, sp_s)))
 
     plt.xlabel('Voltage ($V$)')
     plt.ylabel('Deflection ($mm$)')
     plt.legend(loc='lower right')
+
+def plot_voltage():
+    l_4358       = c.value / 435.8e-9 * np.ones(3)
+    l_546        = c.value / 546e-9 * np.ones(3)
+    l_577        = c.value / 577e-9 * np.ones(3)
+
+    voltage_4358 = find_stopping_potential(wavelength_4358_V, wavelength_4358_d)
+    voltage_546  = find_stopping_potential(wavelength_546_V, wavelength_546_d, limtol=1)
+    voltage_577  = find_stopping_potential(wavelength_577_V, wavelength_577_d, limtol=1, tolerance=[1, 0.75, 0.5])
+
+    wav  = np.concatenate((l_4358, l_546, l_577), axis=0)
+    volt = np.concatenate((voltage_4358, voltage_546, voltage_577), axis=0)
+
+    m, b, sy, sm, sb, r = lsq(wav, volt)
+
+    x = np.linspace(wav[0], wav[-1], 1000)
+
+    plt.plot(x, m*x + b, 'b--')
+
+    plt.errorbar(l_4358, voltage_4358, yerr=np.std(voltage_4358), fmt='r.', ecolor='k')
+    plt.errorbar(l_546, voltage_546, yerr=np.std(voltage_546), fmt='r.', ecolor='k')
+    plt.errorbar(l_577, voltage_577, yerr=np.std(voltage_577), fmt='r.', ecolor='k')
+
+    plt.xlabel('Frequency ($Hz$)')
+    plt.ylabel('Stopping Voltage ($V$)')
+
+def get_h_value():
+    l_4358       = c.value / 435.8e-9 * np.ones(3)
+    l_546        = c.value / 546e-9 * np.ones(3)
+    l_577        = c.value / 577e-9 * np.ones(3)
+
+    voltage_4358 = find_stopping_potential(wavelength_4358_V, wavelength_4358_d)
+    voltage_546  = find_stopping_potential(wavelength_546_V, wavelength_546_d, limtol=1)
+    voltage_577  = find_stopping_potential(wavelength_577_V, wavelength_577_d, limtol=1, tolerance=[1, 0.75, 0.5])
+
+    wav  = np.concatenate((l_4358, l_546, l_577), axis=0)
+    volt = np.concatenate((voltage_4358, voltage_546, voltage_577), axis=0)
+
+    m, b, sy, sm, sb, r = lsq(wav, volt)
+
+    return ('%1.4e ± %1.4e' % (m*q_e.value, sm*q_e.value))
+
+def plot_h_value():
+    l_4358       = c.value / 435.8e-9 * np.ones(3)
+    l_546        = c.value / 546e-9 * np.ones(3)
+    l_577        = c.value / 577e-9 * np.ones(3)
+
+    voltage_4358 = find_stopping_potential(wavelength_4358_V, wavelength_4358_d)
+    voltage_546  = find_stopping_potential(wavelength_546_V, wavelength_546_d, limtol=1)
+    voltage_577  = find_stopping_potential(wavelength_577_V, wavelength_577_d, limtol=1, tolerance=[1, 0.75, 0.5])
+
+    wav  = np.concatenate((l_4358, l_546, l_577), axis=0)
+    volt = np.concatenate((voltage_4358, voltage_546, voltage_577), axis=0)
+
+    m, b, sy, sm, sb, r = lsq(wav, volt)
+    he  = m * q_e.value # h estimate
+    sh = sm * q_e.value
+
+    x = np.linspace(he - 4*sh, he + 4*sh, 1000)
+
+    plt.plot(x, mlab.normpdf(x, he, sh), 'b-', label=('$\\bar{h}$=%1.3e ± %1.3e $J\cdot s$' % (he, sh)))
+    plt.axvline(h.value, ls='--', color='k', label=('$h$=%1.3e $J\cdot s$' % (h.value)))
+    plt.legend(loc='upper center')
