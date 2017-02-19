@@ -6,6 +6,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 from scipy import stats
 from astropy import units as u
@@ -58,9 +59,13 @@ def lsq(x, y):
     vary = cov[1][1]
     sxy  = cov[0][1]
 
-    if np.sqrt(vary) is not np.sqrt(varx):
-        r = sxy / (np.sqrt(vary) * np.sqrt(varx))
-    else:
+    try:
+        if (np.sqrt(vary) is not np.sqrt(varx)):
+            r = sxy / (np.sqrt(vary) * np.sqrt(varx))
+        else:
+            r = np.sign(sxy) * 1
+    except Exception as err:
+        print(str(err))
         r = np.sign(sxy) * 1
 
     # lambda expression for a line
@@ -138,14 +143,15 @@ wavelength_546_d = np.append(wavelength_546_d_1, wavelength_546_d_2)
 # 577 Wavelength -- The two runs are identical
 
 wavelength_577_V_1 = np.array([ZERO, .2, .3, .4, .5, .6, .7, .8, .9, 1.0])
-wavelength_577_d_1 = np.array([-5, -2, -1, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+wavelength_577_d_1 = np.array([-5, -2, -1, -0.5, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
 
 wavelength_577_V_2 = np.array([ZERO, .2, .3, .4, .5, .6, .7, .8, .9, 1.0])
-wavelength_577_d_2 = np.array([-5, -2, -1, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+wavelength_577_d_2 = np.array([-5, -2, -1, -0.5, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
 # Appended for complete data set
 wavelength_577_V = np.append(wavelength_577_V_1, wavelength_577_V_2)
 wavelength_577_d = np.append(wavelength_577_d_1, wavelength_577_d_2)
 
+d_deflection     = 1 # in millimeters
 
 #############################################################
 # 5. Lab-specific functions
@@ -191,8 +197,8 @@ def plot_4358():
     x = np.linspace(0, 1.9, 1000)
 
     plt.figure()
-    plt.plot(wavelength_4358_V, wavelength_4358_d, 'r.')
-    plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label=('r= %f' % (r)))
+    plt.errorbar(wavelength_4358_V, wavelength_4358_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
+    plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label=('Current'))
 
     if lim is not np.zeros(6):
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
@@ -211,7 +217,7 @@ def plot_4358_corrected():
     x = np.linspace(0, 1.9, 1000)
 
     plt.figure()
-    plt.plot(wavelength_4358_V, wavelength_4358_d, 'r.', label='True data')
+    plt.errorbar(wavelength_4358_V, wavelength_4358_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
 
     plt.plot(x, -1*(A+B*np.exp(-1*l*x)) - (-1*(lim[0]*x + lim[1])), 'b-', label='Corrected current')
 
@@ -225,8 +231,8 @@ def plot_546():
 
     x = np.linspace(0, 1.4, 1000)
     plt.figure()
-    plt.plot(wavelength_546_V, wavelength_546_d, 'r.')
-    plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label=('r= %f' % (r)))
+    plt.errorbar(wavelength_546_V, wavelength_546_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
+    plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label='Current')
 
     if lim is not np.zeros(6):
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
@@ -237,3 +243,19 @@ def plot_546():
 
     plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f±%f\n$B=$%f±%f\n$\\lambda=$%f±%f' % (A, sA, B, sB, l, sl), xy=(0.8, 1), xytext=(0.8, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('$y=mx + b$\n$m=$%f±%f\n$b=$%f±%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 1), xytext=(0.3, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+
+def plot_577():
+    A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_577_V, wavelength_577_d)
+    lim                    = find_limit_asymptote(wavelength_577_V, wavelength_577_d, tolerance=1)
+
+    x = np.linspace(0, 1.0, 1000)
+    plt.figure()
+    plt.errorbar(wavelength_577_V, wavelength_577_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
+    plt.plot(x, A - B*np.exp(-1*l*x), 'b--', label='Current')
+
+    if lim is not np.zeros(6):
+        plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
+
+    plt.xlabel('Voltage ($V$)')
+    plt.ylabel('Deflection ($mm$)')
+    plt.legend(loc='lower right')
