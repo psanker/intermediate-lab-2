@@ -5,13 +5,13 @@
 #############################################################
 
 import numpy as np
+import sympy as sp
 import matplotlib.pyplot as plt
 import math
 
 from scipy import stats
 from astropy import units as u
 from astropy import constants as const
-from sympy import *
 from matplotlib import mlab
 from matplotlib import patches
 import decimal as dec
@@ -19,7 +19,7 @@ import decimal as dec
 from scipy.optimize import curve_fit
 
 # Allows LaTeX output in Jupyter and in matplotlib
-init_printing(use_latex=True, use_unicode=True)
+sp.init_printing(use_latex=True, use_unicode=True)
 
 #############################################################
 # 2. Constants
@@ -230,9 +230,6 @@ def find_stopping_potential(x, y, tolerance=[1, 0.5, 0.25], limtol=0.05):
 
     return voltage_guess
 
-def get_stop_4358():
-    return find_stopping_potential(wavelength_4358_V, wavelength_4358_d)
-
 def plot_4358():
     A, sA, B, sB, l, sl, r = exponential_limit_fit(wavelength_4358_V, wavelength_4358_d)
     lim                    = find_limit_asymptote(wavelength_4358_V, wavelength_4358_d, tolerance=0.05)
@@ -274,9 +271,6 @@ def plot_4358():
 #     plt.xlabel('Voltage ($V$)')
 #     plt.ylabel('Deflection ($mm$)')
 #     plt.legend(loc='lower right')
-
-def get_stop_546():
-    return find_stopping_potential(wavelength_546_V, wavelength_546_d, tolerance=0.5)
 
 def plot_546():
     np.seterr(invalid='ignore') # Dirty, but whatever
@@ -347,6 +341,7 @@ def plot_voltage():
 
     x = np.linspace(wav[0], wav[-1], 1000)
 
+    plt.figure()
     plt.plot(x, m*x + b, 'b--')
 
     plt.errorbar(l_4358, voltage_4358, yerr=np.std(voltage_4358), fmt='r.', ecolor='k')
@@ -390,6 +385,7 @@ def plot_h_value():
 
     x = np.linspace(he - 4*sh, he + 4*sh, 1000)
 
+    plt.figure()
     plt.plot(x, mlab.normpdf(x, he, sh), 'b-', label=('$\\bar{h}$=%1.3e ± %1.3e $J\cdot s$' % (he, sh)))
     plt.axvline(h.value, ls='--', color='k', label=('$h$=%1.3e $J\cdot s$' % (h.value)))
-    plt.legend(loc='upper center')
+    plt.legend(loc='upper right')

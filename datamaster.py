@@ -88,6 +88,14 @@ def plot_var(var):
     if selected_lab is not None:
         obj = current_labs[selected_lab]
 
+        if str(var) == 'all':
+
+            for e in dir(obj.lab):
+                if e.startswith('plot_') and callable(getattr(obj.lab, str(e))):
+                    getattr(obj.lab, str(e))()
+
+            return True
+
         try:
             getattr(obj.lab, ('plot_%s' % (var)))()
             return True
@@ -102,6 +110,14 @@ def plot_var(var):
 def get_var(var):
     if selected_lab is not None:
         obj = current_labs[selected_lab]
+
+        if str(var) == 'all':
+
+            for e in dir(obj.lab):
+                if e.startswith('get_') and callable(getattr(obj.lab, str(e))):
+                    print(getattr(obj.lab, str(e))())
+
+            return
 
         try:
             print(getattr(obj.lab, ('get_%s' % (var)))())
