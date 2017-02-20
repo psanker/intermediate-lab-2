@@ -379,13 +379,15 @@ def plot_h_value():
     wav  = np.concatenate((l_4358, l_546, l_577), axis=0)
     volt = np.concatenate((voltage_4358, voltage_546, voltage_577), axis=0)
 
+
     m, b, sy, sm, sb, r = lsq(wav, volt)
     he = m * q_e.value # h estimate
     sh = sm * q_e.value
+    trial_err = he * np.sqrt((((sh)/he)**2) + ((np.std(voltage_4358)**2)/np.mean(voltage_4358)) + ((np.std(voltage_546)**2)/np.mean(voltage_546)) + ((np.std(voltage_577)**2)/np.mean(voltage_577))) #This is gross but it increases the uncertainty
 
     x = np.linspace(he - 4*sh, he + 4*sh, 1000)
 
     plt.figure()
-    plt.plot(x, mlab.normpdf(x, he, sh), 'b-', label=('$\\bar{h}$=%1.3e $\pm$ %1.3e $J\cdot s$' % (he, sh)))
+    plt.plot(x, mlab.normpdf(x, he, trial_err), 'b-', label=('$\\bar{h}$=%1.3e $\pm$ %1.3e $J\cdot s$' % (he, trial_err)))
     plt.axvline(h.value, ls='--', color='k', label=('$h$=%1.3e $J\cdot s$' % (h.value)))
     plt.legend(loc='upper right')
