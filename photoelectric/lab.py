@@ -383,7 +383,7 @@ def plot_h_value():
     m, b, sy, sm, sb, r = lsq(wav, volt)
     he = m * q_e.value # h estimate
     sh = sm * q_e.value
-    trial_err = he * np.sqrt((((sh)/he)**2) + ((np.std(voltage_4358)**2)/np.mean(voltage_4358)) + ((np.std(voltage_546)**2)/np.mean(voltage_546)) + ((np.std(voltage_577)**2)/np.mean(voltage_577))) #This is gross but it increases the uncertainty
+    trial_err = he * np.sqrt((((sh)/he)**2) + ((np.std(voltage_4358)/np.mean(voltage_4358))**2) + ((np.std(voltage_546)/np.mean(voltage_546))**2) + ((np.std(voltage_577)/np.mean(voltage_577))**2)) #This is gross but it increases the uncertainty
 
     x = np.linspace(he - 4*sh, he + 4*sh, 1000)
 
