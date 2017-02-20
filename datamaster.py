@@ -6,8 +6,6 @@
 import signal
 import sys
 import getopt
-from importlib import import_module
-from importlib import reload as rel # Prevent cross definitions
 
 # importing matplotlib so datamaster prints all requested plots at once
 import matplotlib.pyplot as plt

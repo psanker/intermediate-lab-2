@@ -380,7 +380,7 @@ def plot_h_value():
     volt = np.concatenate((voltage_4358, voltage_546, voltage_577), axis=0)
 
     m, b, sy, sm, sb, r = lsq(wav, volt)
-    he  = m * q_e.value # h estimate
+    he = m * q_e.value # h estimate
     sh = sm * q_e.value
 
     x = np.linspace(he - 4*sh, he + 4*sh, 1000)
