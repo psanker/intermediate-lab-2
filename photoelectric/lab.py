@@ -247,14 +247,14 @@ def plot_4358():
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
 
     plt.errorbar(wavelength_4358_V, wavelength_4358_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
-    plt.errorbar(sp_mu, A - B*np.exp(-1*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (sp_mu, sp_s)))
+    plt.errorbar(sp_mu, A - B*np.exp(-1*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f $\pm$ %1.3e$V$' % (sp_mu, sp_s)))
 
     plt.xlabel('Voltage ($V$)')
     plt.ylabel('Deflection ($mm$)')
     plt.legend(loc='lower right')
 
-    plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f±%f\n$B=$%f±%f\n$\\lambda=$%f±%f' % (A, sA, B, sB, l, sl), xy=(1, 5), xytext=(1, -20), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
-    plt.annotate('$y=mx + b$\n$m=$%f±%f\n$b=$%f±%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 6), xytext=(0.5, -35), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f%f\n$B=$%f$\pm$%f\n$\\lambda=$%f$\pm$%f' % (A, sA, B, sB, l, sl), xy=(1, 5), xytext=(1, -20), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('$y=mx + b$\n$m=$%f$\pm$%f\n$b=$%f$\pm$%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 6), xytext=(0.5, -35), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
 
 # Unsure if this is useful at all
 # def plot_4358_corrected():
@@ -291,14 +291,14 @@ def plot_546():
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
 
     plt.errorbar(wavelength_546_V, wavelength_546_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
-    plt.errorbar(sp_mu, A - B*np.exp(-1*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (sp_mu, sp_s)))
+    plt.errorbar(sp_mu, A - B*np.exp(-1*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f $\pm$ %1.3e$V$' % (sp_mu, sp_s)))
 
     plt.xlabel('Voltage ($V$)')
     plt.ylabel('Deflection ($mm$)')
     plt.legend(loc='lower right')
 
-    plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f±%f\n$B=$%f±%f\n$\\lambda=$%f±%f' % (A, sA, B, sB, l, sl), xy=(0.8, 1), xytext=(0.8, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
-    plt.annotate('$y=mx + b$\n$m=$%f±%f\n$b=$%f±%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 1), xytext=(0.3, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f $\pm$ %f\n$B=$%f $\pm$ %f\n$\\lambda=$%f $\pm$ %f' % (A, sA, B, sB, l, sl), xy=(0.8, 1), xytext=(0.8, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('$y=mx + b$\n$m=$%f$\pm$%f\n$b=$%f$\pm$%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 1), xytext=(0.3, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
 
 def plot_577():
     np.seterr(invalid='warn')
@@ -319,7 +319,7 @@ def plot_577():
         plt.plot(x, lim[0]*x + lim[1], 'g--', label='Limit')
 
     plt.errorbar(wavelength_577_V, wavelength_577_d, yerr=d_deflection, fmt='r.', ecolor='k', alpha=0.4)
-    plt.errorbar(sp_mu, A - B*np.exp(-1.*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f±%1.3e$V$' % (sp_mu, sp_s)))
+    plt.errorbar(sp_mu, A - B*np.exp(-1.*l*sp_mu), xerr=sp_s, yerr=lim[2], fmt='go', ecolor='k', label=('%1.3f $\pm$ %1.3e$V$' % (sp_mu, sp_s)))
 
     plt.xlabel('Voltage ($V$)')
     plt.ylabel('Deflection ($mm$)')
@@ -386,6 +386,6 @@ def plot_h_value():
     x = np.linspace(he - 4*sh, he + 4*sh, 1000)
 
     plt.figure()
-    plt.plot(x, mlab.normpdf(x, he, sh), 'b-', label=('$\\bar{h}$=%1.3e ± %1.3e $J\cdot s$' % (he, sh)))
+    plt.plot(x, mlab.normpdf(x, he, sh), 'b-', label=('$\\bar{h}$=%1.3e $\pm$ %1.3e $J\cdot s$' % (he, sh)))
     plt.axvline(h.value, ls='--', color='k', label=('$h$=%1.3e $J\cdot s$' % (h.value)))
     plt.legend(loc='upper right')
