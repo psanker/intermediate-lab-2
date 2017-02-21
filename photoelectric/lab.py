@@ -298,7 +298,7 @@ def plot_546():
     plt.legend(loc='lower right')
 
     plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f $\pm$ %f\n$B=$%f $\pm$ %f\n$\\lambda=$%f $\pm$ %f' % (A, sA, B, sB, l, sl), xy=(0.8, 1), xytext=(0.8, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
-    plt.annotate('$y=mx + b$\n$m=$%f$\pm$%f\n$b=$%f$\pm$%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 1), xytext=(0.3, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('$y=mx + b$\n$m=$%f$\pm$%f\n$b=$%f$\pm$%f\n$r=$%f' % (lim[0], lim[3], lim[1], lim[4], lim[5]), xy=(0.2, 1), xytext=(0.25, -15), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
 
 def plot_577():
     np.seterr(invalid='warn')
@@ -325,6 +325,9 @@ def plot_577():
     plt.ylabel('Deflection ($mm$)')
     plt.legend(loc='lower right')
 
+    plt.annotate('$f(x)=A + Be^{-\\lambda x}$\n$A=$%f $\pm$ %f\n$B=$%f $\pm$ %f\n$\\lambda=$%f $\pm$ %f' % (A, sA, B, sB, l, sl), xy=(0.85, .12), xytext=(0.63, -3.35), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+
+
 def plot_voltage():
     l_4358       = c.value / 435.8e-9 * np.ones(3)
     l_546        = c.value / 546e-9 * np.ones(3)
@@ -350,6 +353,8 @@ def plot_voltage():
 
     plt.xlabel('Frequency ($Hz$)')
     plt.ylabel('Stopping Voltage ($V$)')
+
+    plt.annotate('$y=mx + b$\n$m=$%1.3e$\pm$%1.3e\n$b=$%f$\pm$%f\n$r=$%f' % (m, sm, b, sb, r), xy=(6*(10**14), .88), xytext=(5.4*(10**14), 1), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
 
 def get_h_value():
     l_4358       = c.value / 435.8e-9 * np.ones(3)
@@ -383,11 +388,10 @@ def plot_h_value():
     m, b, sy, sm, sb, r = lsq(wav, volt)
     he = m * q_e.value # h estimate
     sh = sm * q_e.value
-    trial_err = he * np.sqrt((((sh)/he)**2) + ((np.std(voltage_4358)/np.mean(voltage_4358))**2) + ((np.std(voltage_546)/np.mean(voltage_546))**2) + ((np.std(voltage_577)/np.mean(voltage_577))**2)) #This is gross but it increases the uncertainty
 
     x = np.linspace(he - 4*sh, he + 4*sh, 1000)
 
     plt.figure()
-    plt.plot(x, mlab.normpdf(x, he, trial_err), 'b-', label=('$\\bar{h}$=%1.3e $\pm$ %1.3e $J\cdot s$' % (he, trial_err)))
+    plt.plot(x, mlab.normpdf(x, he, sh), 'b-', label=('$\\bar{h}$=%1.3e $\pm$ %1.3e $J\cdot s$' % (he, sh)))
     plt.axvline(h.value, ls='--', color='k', label=('$h$=%1.3e $J\cdot s$' % (h.value)))
     plt.legend(loc='upper right')
