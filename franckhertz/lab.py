@@ -168,9 +168,129 @@ def get_peaks2():
 
     return find_peaks(volta_2, voltb_2)
 
-def plot_test():
+def get_peaks3():
+    '''
+    Returns the set of peaks for the third run
+    '''
+
+    return find_peaks(volta_3, voltb_3)
+
+def get_peaks4():
+    '''
+    Returns the set of peaks for the fourth run
+    '''
+
+    return find_peaks(volta_4, voltb_4)
+
+def get_peaks5():
+    '''
+    Returns the set of peaks for the fifth run
+    '''
+
+    return find_peaks(volta_5, voltb_5)
+
+def average_peaks():
+    '''
+    Finds the average value of each peak with corrected propagated error
+
+    Returns array of [[x1, y1, sx1, sy1], [x2, y2, sx2, sy2], ...]
+    '''
+    peaks = np.array([get_peaks1(), get_peaks2(), get_peaks3(), get_peaks4(), get_peaks5()])
+
+    peaks_6 = []
+    peaks_7 = []
+
+    # Firstly, sort by which peak arrays have length 6 and 7
+    for i in range(len(peaks)):
+        if len(peaks[i]) == 6:
+            peaks_6.append(peaks[i])
+        elif len(peaks[i] == 7):
+            peaks_7.append(peaks[i])
+        else:
+            print('Peak length for index %d is neither 6 nor 7' % (i))
+
+    # Cast as numpy arrays and extract sets of {x, y} data per each index
+    peaks_6 = np.array(peaks_6)
+    peaks_7 = np.array(peaks_7)
+
+    x   = []
+    y   = []
+
+    for i in range(5):
+        if i < 2:
+            x.append((peaks_7[i]).T[0])
+            y.append((peaks_7[i]).T[1])
+        else:
+            # Shift index back 2, prepend dummy number to make total array have sound dimensions
+            x.append(np.insert((peaks_6[i - 2]).T[0], 0, [-99.]))
+            y.append(np.insert((peaks_6[i - 2]).T[1], 0, [-99.]))
+
+    x = np.array(x)
+    y = np.array(y)
+
+    # Now, find mean and deviation of columns of x and y
+    col_x = x.T
+    col_y = y.T
+
+    mu_x = []
+    s_x  = []
+    mu_y = []
+    s_y  = []
+
+    for i in range(len(col_x)):
+
+        # Filter out the dummy numbers
+        if i == 0:
+            xbar = np.mean(col_x[i][:2])
+            ybar = np.mean(col_y[i][:2])
+
+            sx   = np.std(col_x[i][:2])
+            sy   = np.std(col_y[i][:2])
+
+            mu_x.append(xbar)
+            mu_y.append(ybar)
+
+            s_x.append(sx)
+            s_y.append(sy)
+        else:
+            xbar = np.mean(col_x[i])
+            ybar = np.mean(col_y[i])
+
+            sx   = np.std(col_x[i])
+            sy   = np.std(col_y[i])
+
+            mu_x.append(xbar)
+            mu_y.append(ybar)
+
+            s_x.append(sx)
+            s_y.append(sy)
+
+    # Cast to NumPy arrays and export
+    mu_x = np.array(mu_x)
+    mu_y = np.array(mu_y)
+    s_x  = np.array(s_x)
+    s_y  = np.array(s_y)
+
+    out = []
+
+    for i in range(len(mu_x)):
+        out.append([mu_x[i], mu_y[i], s_x[i], s_y[i]])
+
+    return np.array(out)
+
+def get_avgpeaks():
+    return average_peaks()
+
+def plot_peaks():
     '''
     Test plotting function; checks if concatenated data resembles what we measured
     '''
 
     plt.plot(volta, voltb, 'r.')
+
+    avg = average_peaks().T # The transpose makes this next line a one-liner
+    plt.errorbar(avg[0], avg[1], xerr=avg[2], yerr=avg[3], fmt='go', ecolor='k', label='Average peaks')
+
+    plt.legend(loc='upper left')
+    plt.xlabel('Channel A Voltage ($V$)')
+    plt.ylabel('Channel B Voltage ($V$)')
