@@ -297,11 +297,28 @@ def get_avgsep():
 
     return np.array(diffs)
 
+def get_wavelength():
+    '''
+    Determine the computed energy from the average voltage difference for an electron
+    through the voltage.
+    '''
+
+    diffs = get_avgsep()
+
+    V     = np.mean(diffs)
+    sV    = np.std(diffs)
+
+    lam   = (h.value * c.value) / (q_e.value * V)
+    slam  = ((h.value * c.value) / (q_e.value * V**2.)) * sV
+
+    return ('%1.3f ± %1.3f nm' % (lam * 1e9, slam * 1e9))
+
 def plot_peaks():
     '''
     Test plotting function; checks if concatenated data resembles what we measured
     '''
 
+    plt.figure()
     plt.plot(volta*10., voltb, 'r.')
 
     avg = average_peaks().T # The transpose makes this next line a one-liner
@@ -322,6 +339,7 @@ def plot_avgsep():
 
     x     = np.linspace(mu - 4*s, mu + 4*s, 1000)
 
+    plt.figure()
     plt.plot(x, mlab.normpdf(x, mu, s), 'b-', label='$%1.3f \pm %1.3f V$' % (mu, s))
     plt.axvline(4.9, ls='--', color='k', label='Expected: $4.9 V$')
 
