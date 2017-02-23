@@ -281,16 +281,48 @@ def average_peaks():
 def get_avgpeaks():
     return average_peaks()
 
+def get_avgsep():
+    '''
+    Find the average voltage separation between the peak points
+    '''
+
+    chanA = average_peaks()[1:].T[0] * 10.
+    diffs = []
+
+    for i in range(len(chanA)):
+        if i == 0:
+            continue
+        else:
+            diffs.append(chanA[i] - chanA[i - 1])
+
+    return np.array(diffs)
+
 def plot_peaks():
     '''
     Test plotting function; checks if concatenated data resembles what we measured
     '''
 
-    plt.plot(volta, voltb, 'r.')
+    plt.plot(volta*10., voltb, 'r.')
 
     avg = average_peaks().T # The transpose makes this next line a one-liner
-    plt.errorbar(avg[0], avg[1], xerr=avg[2], yerr=avg[3], fmt='go', ecolor='k', label='Average peaks')
+    plt.errorbar(avg[0]*10., avg[1], xerr=avg[2]*10., yerr=avg[3], fmt='go', ecolor='k', label='Average peaks')
 
     plt.legend(loc='upper left')
     plt.xlabel('Channel A Voltage ($V$)')
     plt.ylabel('Channel B Voltage ($V$)')
+
+def plot_avgsep():
+    '''
+    Plot calculated separation voltage compared to expected value
+    '''
+
+    diffs = get_avgsep()
+    mu    = np.mean(diffs)
+    s     = np.std(diffs)
+
+    x     = np.linspace(mu - 4*s, mu + 4*s, 1000)
+
+    plt.plot(x, mlab.normpdf(x, mu, s), 'b-', label='$%1.3f \pm %1.3f V$' % (mu, s))
+    plt.axvline(4.9, ls='--', color='k', label='Expected: $4.9 V$')
+
+    plt.legend(loc='upper left')
