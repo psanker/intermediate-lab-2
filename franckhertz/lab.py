@@ -120,6 +120,10 @@ volta_5, voltb_5 = np.loadtxt(path.abspath(
 volta = np.concatenate((volta_1, volta_2, volta_3, volta_4, volta_5), axis=0)
 voltb = np.concatenate((voltb_1, voltb_2, voltb_3, voltb_4, voltb_5), axis=0)
 
+# Saturated Peak Data
+
+volta_s, voltb_s = np.loadtxt(path.abspath('./franckhertz/saturated-ramp.txt'), skiprows=2, unpack=True)
+
 #############################################################
 # 5. Lab-specific functions
 #############################################################
@@ -344,3 +348,14 @@ def plot_avgsep():
     plt.axvline(4.9, ls='--', color='k', label='Expected: $4.9 V$')
 
     plt.legend(loc='upper left')
+
+def plot_saturated():
+    '''
+    Plot the saturated voltage data
+    '''
+
+    plt.figure()
+    plt.plot(volta_s, voltb_s, 'g-.', label='Saturated Signal')
+    plt.legend(loc='upper left')
+    plt.xlabel('Channel A Voltage ($V$)')
+    plt.ylabel('Channel B Voltage ($V$)')
