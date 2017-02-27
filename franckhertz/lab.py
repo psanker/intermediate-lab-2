@@ -357,12 +357,12 @@ def plot_saturated():
 
     plt.figure()
     ax = plt.gca()
-    ax.plot(volta_s, voltb_s, 'g-.', label='Saturated Signal')
+    ax.plot(volta_s*10, voltb_s, 'g-.', label='Saturated Signal')
     ax.legend(loc='upper left')
     plt.xlabel('Channel A Voltage ($V$)')
     plt.ylabel('Channel B Voltage ($V$)')
-    plt.annotate('Saturation', xy=(2.18, 9.88), xytext=(2.2, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
-    plt.annotate('Saturation', xy=(2.69, 9.88), xytext=(2.2, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
-    plt.annotate('Saturation', xy=(3.13, 9.88), xytext=(2.2, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('Saturation', xy=(21.8, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('Saturation', xy=(26.9, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('Saturation', xy=(31.3, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
 
 
