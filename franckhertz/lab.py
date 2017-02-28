@@ -283,7 +283,8 @@ def average_peaks():
     return np.array(out)
 
 def get_avgpeaks():
-    return average_peaks()
+    p = average_peaks().T
+    return np.array([p[0]*10., p[1], p[2]*10., p[3]])
 
 def get_avgsep():
     '''
@@ -364,5 +365,3 @@ def plot_saturated():
     plt.annotate('Saturation', xy=(21.8, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('Saturation', xy=(26.9, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('Saturation', xy=(31.3, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
-
-
