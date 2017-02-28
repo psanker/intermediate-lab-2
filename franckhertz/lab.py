@@ -353,7 +353,7 @@ def plot_avgsep():
 
 def plot_saturated():
     '''
-    Plot the saturated voltage data
+    Plot the saturated voltage data and label the saturated portions
     '''
 
     plt.figure()
@@ -362,6 +362,8 @@ def plot_saturated():
     ax.legend(loc='upper left')
     plt.xlabel('Channel A Voltage ($V$)')
     plt.ylabel('Channel B Voltage ($V$)')
+    plt.annotate('Saturation', xy=(11.95, 5.96), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+    plt.annotate('Saturation', xy=(16.8, 9.70), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('Saturation', xy=(21.8, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('Saturation', xy=(26.9, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.annotate('Saturation', xy=(31.3, 9.88), xytext=(22, 7.2), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
