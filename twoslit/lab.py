@@ -96,3 +96,82 @@ def lsq(x, y):
 #############################################################
 # 4. Data
 #############################################################
+
+
+#Laser Source
+
+bg_laser = .007 #background voltage
+
+pos_laser = np.array([3.33, 3.37, 3.39, 3.43, 3.49, 3.7, 3.71, 3.78, 3.8, 3.82, 3.84, 3.85, 3.88, 4.42, 5.1, 5.13, 5.15, 5.16, 5.17, 5.19, 5.21, 5.27, 5.46, 5.53, 5.56, 5.59, 5.61, 5.65])
+intensity_laser = np.array([.008, .05, .107, .248, .34, .342, .349, .608, .813, 1.018, 1.2, 1.318, 1.471, 1.518, 1.473, 1.372, 1.252, 1.138, 1.016, .836, .654, .462, .465, .386, .259, .139, .053, .008]) - bg_laser
+
+#Bulb Source
+
+#############################################################
+# 5. Lab-specific functions
+#############################################################
+
+def get_singlemaxleft():
+    '''
+    Estimates the maximum intensity and uncertainty for the left side single slit pattern
+
+    Returns an array of [Intensity max, Intensity std, Position Max, Position std]
+    '''
+    li = np.array([.34, .342, .349])
+    mu_li = np.mean(li)
+    dli = np.std(li)
+    lp = np.array([3.49, 3.7, 3.71])
+    mu_lp = np.mean(lp)
+    dlp = np.std(lp)
+
+    return np.array([mu_li, dli, mu_lp, dlp])
+
+def get_singlemaxright():
+    '''
+    Estimates the maximum intensity and uncertainty for the right side single slit pattern
+
+    Returns an array of [Intensity max, Intensity std, Position Max, Position std]
+    '''
+    ri = np.array([.462, .465])
+    mu_ri = np.mean(ri)
+    dri = np.std(ri)
+    rp = np.array([5.27, 5.46])
+    mu_rp = np.mean(rp)
+    drp = np.std(rp)
+
+    return np.array([mu_ri, dri, mu_rp, drp])
+
+def get_doublemax():
+    '''
+    Estimates the maximum intensity and uncertainty for the double slit pattern
+
+    Returns an array of [Intensity max, Intensity std, Position, Postion uncertainty]
+    '''
+    i = np.array([1.509, 1.518])
+    mu_i = np.mean(i)
+    di = np.std(i)
+    pos = 4.42
+    dp = .01
+
+    return np.array([mu_i, di, pos, dp])
+
+def plot_laser():
+    '''
+    Plots the Two Slit Intensity Pattern
+    '''
+    leftside = get_singlemaxleft()
+    rightside = get_singlemaxright()
+    double = get_doublemax()
+    Intensitymax = np.array([leftside[0], 1.518, rightside[0]])
+    Intensityerr = np.array([leftside[1], double[1], rightside[1]])
+    Positionmax = np.array([leftside[2], 4.42, rightside[2]])
+    Positionerr = np.array([leftside[3], .01, rightside[3]])
+
+
+    plt.figure()
+    plt.plot(pos_laser, intensity_laser, '.b-', label='Two Slit Interference Pattern')
+    plt.errorbar(Positionmax, Intensitymax, xerr=Positionerr, yerr=Intensityerr, fmt='ro', ecolor='k', label='Intensity Maximums')
+
+    plt.legend(loc='lower center')
+    plt.xlabel('Detector Position ($mm$)')
+    plt.ylabel('Intensity ($V$)')
