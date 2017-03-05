@@ -102,15 +102,28 @@ def lsq(x, y):
 
 bg_laser = .007 #background voltage
 
-pos_laser = np.array([3.33, 3.37, 3.39, 3.43, 3.49, 3.7, 3.71, 3.78, 3.8, 3.82, 3.84, 3.85, 3.88, 4.42, 5.1, 5.13, 5.15, 5.16, 5.17, 5.19, 5.21, 5.27, 5.46, 5.53, 5.56, 5.59, 5.61, 5.65])
-intensity_laser = np.array([.008, .05, .107, .248, .34, .342, .349, .608, .813, 1.018, 1.2, 1.318, 1.471, 1.518, 1.473, 1.372, 1.252, 1.138, 1.016, .836, .654, .462, .465, .386, .259, .139, .053, .008]) - bg_laser
+pos_laser = np.array([3.33, 3.37, 3.39, 3.43, 3.49, 3.7, 3.71, 3.78, 3.8, 3.82, 3.84, 3.85, 3.88, 4.42, 5.1, 5.13, 5.15, 5.16, 5.17, 5.19, 5.21, 5.27, 5.46, 5.53, 5.56, 5.59, 5.61, 5.65]) #mm
+intensity_laser = np.array([.008, .05, .107, .248, .34, .342, .349, .608, .813, 1.018, 1.2, 1.318, 1.471, 1.518, 1.473, 1.372, 1.252, 1.138, 1.016, .836, .654, .462, .465, .386, .259, .139, .053, .008]) - bg_laser #V
 
 #Bulb Source
+
+pulse_rand = np.array([1.053, 1.053, 1.072, 1.078, 1.062, .966, 1.084, 1.039, 1.041, 1.039]) #kHz
+
+counts_double = np.array([.379, .468, .444, .367, .241, .269, .486, .714, .881, .738, .434, .163, .220, .530, .953, 1.037, .816, .376, .137, .273, .561, .806, .755, .525, .295, .229, .269, .371, .403, .425, .295]) #kHz
+pos_double = np.linspace(3.75, 6.75, num=len(counts_double))
+
+counts_single1 = np.array([.161, .185, .202, .233, .215, .271, .265, .320, .312, .304, .362, .317, .315, .261, .251, .259, .213, .234, .190, .168, .140]) #kHz
+counts_single2 = np.array([.154, .181, .193, .240, .222, .282, .268, .277, .314, .311, .349, .306, .314, .278, .259, .265, .211, .238, .183, .156, .145]) #kHz -- so so dirty
+pos_single = np.linspace(4.25, 6.25, num=len(counts_single1))
+
+bg_bulb = np.array([.022, .019, .024, .024, .02, .026, .018, .018, .019, .018, .029, .020, .018, .019, .02, .029])
 
 #############################################################
 # 5. Lab-specific functions
 #############################################################
 
+
+#Laser Source
 def get_singlemaxleft():
     '''
     Estimates the maximum intensity and uncertainty for the left side single slit pattern
@@ -155,9 +168,10 @@ def get_doublemax():
 
     return np.array([mu_i, di, pos, dp])
 
+
 def plot_laser():
     '''
-    Plots the Two Slit Intensity Pattern
+    Plots the Two Slit Intensity Pattern for the laser source
     '''
     leftside = get_singlemaxleft()
     rightside = get_singlemaxright()
@@ -169,9 +183,49 @@ def plot_laser():
 
 
     plt.figure()
-    plt.plot(pos_laser, intensity_laser, '.b-', label='Two Slit Interference Pattern')
+    plt.plot(pos_laser, intensity_laser, '.b-', label='Two Slit Intensity Distribution')
     plt.errorbar(Positionmax, Intensitymax, xerr=Positionerr, yerr=Intensityerr, fmt='ro', ecolor='k', label='Intensity Maximums')
 
     plt.legend(loc='lower center')
+    plt.xlabel('Detector Position ($mm$)')
+    plt.ylabel('Intensity ($V$)')
+
+
+#Bulb Source
+def get_satisfaction():
+    '''
+    Answers the question "Are you satisfied that most of your counts lie in the range of the average?"
+    '''
+    C = np.mean(pulse_rand)
+    dC = np.std(pulse_rand)
+    bad = []
+
+    for i in range(len(pulse_rand)):
+        if pulse_rand[i] < (C - dC):
+            bad.append(1)
+        elif pulse_rand[i] > (C + dC):
+            bad.append(1)
+    if len(bad) < 3:
+        print "All is well, only %d counts lie outside the range." %len(bad)
+    return '%1.3f ± %1.3f kHz' % (C, dC)
+
+def get_background():
+    '''
+    Determines best value for background counts with the bulb source
+    '''
+    bg = np.mean(bg_bulb)
+    dbg = np.std(bg_bulb)
+    return bg, dbg
+
+def plot_bulb():
+    '''
+    Plots intensity pattern for bub source
+    '''
+    BG, dBG = get_background()
+    plt.figure()
+    plt.plot(pos_double, counts_double - BG, '.b-', alpha=0.7, label='Two Slit Intensity')
+    plt.plot(pos_single, counts_single1 - BG, '.g-', alpha=0.7, label='Left Single Slit Intensity')
+    plt.plot(pos_single, counts_single2 - BG, '.m-', alpha=0.7, label='Right Single Slit Intensity')
+    plt.legend(loc='upper right')
     plt.xlabel('Detector Position ($mm$)')
     plt.ylabel('Intensity ($V$)')
