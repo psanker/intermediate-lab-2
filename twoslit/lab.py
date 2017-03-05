@@ -219,7 +219,7 @@ def get_background():
 
 def plot_bulb():
     '''
-    Plots intensity pattern for bub source
+    Plots intensity pattern for bulb source
     '''
     BG, dBG = get_background()
     plt.figure()
