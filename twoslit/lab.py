@@ -206,7 +206,7 @@ def get_satisfaction():
         elif pulse_rand[i] > (C + dC):
             bad.append(1)
     if len(bad) < 3:
-        print "All is well, only %d counts lie outside the range." %len(bad)
+        print("All is well, only %d counts lie outside the range." % len(bad))
     return '%1.3f ± %1.3f kHz' % (C, dC)
 
 def get_background():
