@@ -17,7 +17,7 @@ init_printing(use_latex=True, use_unicode=True)
 
 cli_thread = True
 
-LABS = ['halflife', 'michelson', 'photoelectric', 'franckhertz', 'twoslit']
+LABS = ['halflife', 'michelson', 'photoelectric', 'franckhertz', 'twoslit', 'esr']
 
 current_labs = {}
 selected_lab = None
