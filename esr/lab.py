@@ -140,6 +140,7 @@ def get_gee():
     gee = (h.value * slope) / muB
 
     dgee = (sm / m) * gee
+
     return gee, dgee
 
 
