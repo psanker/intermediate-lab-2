@@ -119,12 +119,14 @@ def plot_line():
     x = np.linspace(Bfield[0], Bfield[-1], 1000)
 
     plt.figure()
-    plt.plot(x, m*x + b, 'b--')
-    plt.errorbar(Bfield, res, xerr=2.115*.001, fmt='r.', ecolor='k')
+
+    plt.plot(x, m*x + b, 'b--', label='Linear Fit')
+    plt.errorbar(Bfield, res, xerr=2.115*.001, fmt='r.', ecolor='k', label='Magnetic Field Data')
 
     plt.annotate('$y=mx + b$\n$m=$%.3f$\pm$%.3f\n$b=$%.3f$\pm$%.3f\n$r=$%.4f' % (m, sm, b, sb, r), xy=(2.6, 54), xytext=(3.1, 27.4), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
     plt.xlabel('Magnetic Field ($mT$)')
     plt.ylabel('Resonant Frequency ($MHz$)')
+    plt.legend(loc='upper left')
 
 
 def get_gee():
