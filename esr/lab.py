@@ -45,10 +45,7 @@ m_n = const.m_n
 m_p = const.m_p
 R_H = 2.18e-18 * u.J
 q_e = const.e
-<<<<<<< Updated upstream
 mu0 = const.mu0
-=======
->>>>>>> Stashed changes
 
 ZERO = 0.00001
 
@@ -90,9 +87,9 @@ def lsq(x, y):
     pvals, pcov = curve_fit(f, x, y, p0=pars)
 
     m, b = pvals
-    sm = np.sqrt(pcov[0, 0])
-    sb = np.sqrt(pcov[1, 1])
-    sy = np.sqrt(vary)
+    sm  = np.sqrt(pcov[0, 0])
+    sb  = np.sqrt(pcov[1, 1])
+    sy  = np.sqrt(vary)
 
     # y = mx + b; r is correlation
     return m, b, sy, sm, sb, r
@@ -101,17 +98,16 @@ def lsq(x, y):
 # 4. Data
 #############################################################
 
-res = np.array([16.1, 20.1, 25.1, 30.1, 31.6, 35.6, 40.6, 45.6, 50.6, 55.6, 60.6, 65.6, 70.6, 74.6, 75.0, 80.0, 85.0, 90.0, 95.0, 100.0])
+res     = np.array([16.1, 20.1, 25.1, 30.1, 31.6, 35.6, 40.6, 45.6, 50.6, 55.6, 60.6, 65.6, 70.6, 74.6, 75.0, 80.0, 85.0, 90.0, 95.0, 100.0])
 current = np.array([.347, .438, .546, .658, .694, .781, .891, 1.0, 1.109, 1.219, 1.328, 1.436, 1.550, 1.632, 1.612, 1.716, 1.831, 1.933, 2.043, 2.152])
-Bfield = 2.115 * current
+Bfield  = 2.115 * current
 
-dW = 1.8
+dW      = 1.8
 I_modpp = 2*np.sqrt(2)*0.493
 
 #############################################################
 # 5. Lab-specific functions
 #############################################################
-
 
 def plot_line():
     '''
@@ -138,12 +134,10 @@ def get_gee():
     '''
     m, b, sy, sm, sb, r = lsq(Bfield, res)
 
-    muB = (q_e.value*hbar.value) / (2*m_e.value)
+    muB   = (q_e.value*hbar.value) / (2*m_e.value)
+    slope = m * 1e9 #for unit conversion
 
-    slope = m * 10**9 #for unit conversion
-
-    gee = (h.value * slope) / muB
-
+    gee  = (h.value * slope) / muB
     dgee = (sm / m) * gee
 
     return gee, dgee
@@ -153,6 +147,7 @@ def get_deltaB():
     '''
     Calculates delta B, the full width at half height of the resonance in terms of the magnetic field.
     '''
-    deltaB = ((I_modpp*dW) / 10) * 2.115
+    deltaB  = ((I_modpp*dW) / 10.) * 2.115
     sdeltaB = np.sqrt((.2/1.8)**2 + (.001/.493)**2)*deltaB
+
     return deltaB, sdeltaB

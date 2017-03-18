@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# an attempt to unify all the lab scripts into one executable so that we don't need to
-# rewrite old code and shit
+#  _____        _        __  __           _
+# |  __ \      | |      |  \/  |         | |
+# | |  | | __ _| |_ __ _| \  / | __ _ ___| |_ ___ _ __
+# | |  | |/ _` | __/ _` | |\/| |/ _` / __| __/ _ \ '__|
+# | |__| | (_| | || (_| | |  | | (_| \__ \ ||  __/ |
+# |_____/ \__,_|\__\__,_|_|  |_|\__,_|___/\__\___|_|
+
+# A lab module loader for unified data analysis
 
 import signal
 import sys
@@ -25,9 +31,11 @@ selected_lab = None
 def fetch_lab(name, load):
     obj = None
 
+    # TODO: remove this check in place of just seeing if the directory exists
     if name not in LABS:
+        # Directly return None instead of obj
         print('Invalid lab name')
-        return
+        return None
 
     if name in current_labs and not load:
         if current_labs[name] is not None:
@@ -39,7 +47,15 @@ def fetch_lab(name, load):
             unload_lab(name)
 
             obj = load_lab(name)
-            current_labs[name] = obj
+
+            if obj is None:
+                print('Reload of %s failed; Try loading directly from file?' % (name))
+
+                unload_lab(name)
+                return None
+            else:
+                current_labs[name] = obj
+
         except Exception as err:
             print('Reload of lab failed')
             print(str(err))
@@ -75,6 +91,7 @@ def unload_lab(name):
     if str(selected_lab) is name:
         selected_lab = ''
 
+    # Filter submodules that belong to target lab, if it exists
     for mod in sys.modules.keys():
         if mod.startswith('%s.' % (name)):
             rm.append(mod)
@@ -82,8 +99,12 @@ def unload_lab(name):
     for i in rm:
         del sys.modules[i]
 
-    del sys.modules[name]
-    del current_labs[name]
+    # Redundant checks in case reference is broken
+    if name in sys.modules:
+        del sys.modules[name]
+
+    if name in current_labs:
+        del current_labs[name]
 
 def select_lab(name, load=False):
     lab = fetch_lab(name, load)
