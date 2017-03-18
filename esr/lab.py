@@ -45,7 +45,10 @@ m_n = const.m_n
 m_p = const.m_p
 R_H = 2.18e-18 * u.J
 q_e = const.e
+<<<<<<< Updated upstream
 mu0 = const.mu0
+=======
+>>>>>>> Stashed changes
 
 ZERO = 0.00001
 
