@@ -126,7 +126,7 @@ bg_bulb = np.array([.022, .019, .024, .024, .02, .026, .018, .018, .019, .018, .
 #Laser Source
 def get_singlemaxleft():
     '''
-    Estimates the maximum intensity and uncertainty for the left side single slit pattern
+    Estimates the maximum intensity and uncertainty for the left side single slit pattern of the laser
 
     Returns an array of [Intensity max, Intensity std, Position Max, Position std]
     '''
@@ -141,7 +141,7 @@ def get_singlemaxleft():
 
 def get_singlemaxright():
     '''
-    Estimates the maximum intensity and uncertainty for the right side single slit pattern
+    Estimates the maximum intensity and uncertainty for the right side single slit pattern of the laser
 
     Returns an array of [Intensity max, Intensity std, Position Max, Position std]
     '''
@@ -156,7 +156,7 @@ def get_singlemaxright():
 
 def get_doublemax():
     '''
-    Estimates the maximum intensity and uncertainty for the double slit pattern
+    Estimates the maximum intensity and uncertainty for the double slit pattern of the laser
 
     Returns an array of [Intensity max, Intensity std, Position, Postion uncertainty]
     '''
@@ -183,11 +183,11 @@ def plot_laser():
 
 
     plt.figure()
-    plt.plot(pos_laser, intensity_laser, '.b-', label='Two Slit Intensity Distribution')
+    plt.plot(pos_laser, intensity_laser, '.b-', label='Maximum Intensity Distribution')
     plt.errorbar(Positionmax, Intensitymax, xerr=Positionerr, yerr=Intensityerr, fmt='ro', ecolor='k', label='Intensity Maximums')
 
     plt.legend(loc='lower center')
-    plt.xlabel('Detector Position ($mm$)')
+    plt.xlabel('Blocker Position ($mm$)')
     plt.ylabel('Intensity ($V$)')
 
 
