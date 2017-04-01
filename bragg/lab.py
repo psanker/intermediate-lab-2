@@ -106,9 +106,13 @@ def second_deriv(arr, i, dx):
     else:
         return (arr[i + 1] - 2.*arr[i] + arr[i - 1]) / dx
 
+
 #############################################################
 # 4. Data
 #############################################################
+deg, calibrated = np.loadtxt(path.abspath(
+    './bragg/calibrated.csv'), skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
+
 
 #############################################################
 # 5. Lab-specific functions
