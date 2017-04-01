@@ -111,7 +111,7 @@ def second_deriv(arr, i, dx):
 # 4. Data
 #############################################################
 deg, calibrated = np.loadtxt(path.abspath(
-    './bragg/calibrated.csv'), skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
+    './bragg/calibrated.csv'), skiprows=1, delimiter=',', usecols=(0, 4), unpack=True)
 
 
 #############################################################
