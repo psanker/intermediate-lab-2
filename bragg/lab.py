@@ -115,23 +115,23 @@ def second_deriv(arr, i, dx):
 # All CSV data comes in the form of [theta, counts / s...]
 # each column after the first is a single run
 
-f = codecs.open(path.abspath('./bragg/calibrated.csv'), encoding='utf-8')
+f = codecs.open(path.abspath('./bragg/calibrated.csv'), encoding='utf8')
 deg, calibrated = np.loadtxt(f, skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
 
 # NaCl, varying current
-f = codecs.open(path.abspath('./bragg/SaltyCurrent.csv'), encoding='utf-8')
+f = codecs.open(path.abspath('./bragg/SaltyCurrent.csv'), encoding='utf8')
 inacl_deg, inacl_c1, inacl_c2, inacl_c3, inacl_c4 = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 # NaCl, varying voltage
-f = codecs.open(path.abspath('./bragg/SaltyVoltage.csv'), encoding='utf-8')
+f = codecs.open(path.abspath('./bragg/SaltyVoltage.csv'), encoding='utf8')
 vnacl_deg, vnacl_c1, vnacl_c2, vnacl_c3, vnacl_c4, vnacl_c5 = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 # Al crystal sample
-f = codecs.open(path.abspath('./bragg/AlCrystal.csv'), encoding='utf-8')
+f = codecs.open(path.abspath('./bragg/AlCrystal.csv'), encoding='utf8')
 alcry_deg, alcry_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 # Al slab sample
-f = codecs.open(path.abspath('./bragg/AlNotCrystal.csv'), encoding='utf-8')
+f = codecs.open(path.abspath('./bragg/AlNotCrystal.csv'), encoding='utf8')
 alslab_deg, alslab_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 #############################################################
