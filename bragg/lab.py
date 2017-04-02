@@ -186,6 +186,44 @@ def find_peaks(x, y):
 
     return np.array(filtered_maxima)
 
+def find_cutoff(x, y, limit=0, tolerance=0.1):
+    '''
+    Find a linear fit which approximately finds the voltage cutoff point
+    '''
+
+    work_x = x[limit:]
+    work_y = y[limit:]
+
+    assert len(work_x) == len(work_y), 'Array dimensions must match to find cutoff'
+
+    # Before beginning, set all 0 terms to machine zero
+    for i in range(len(work_x)):
+        if work_x[i] == 0.0:
+            work_x[i] = ZERO
+
+        if work_y[i] == 0.0:
+            work_y[i] = ZERO
+
+    m, b, sy, sm, sb, r = (0., 0., 0., 0., 0., 0.)
+    search = True
+
+    while (search):
+
+        # Generate LSQ linear fit
+        m, b, sy, sm, sb, r = lsq(work_x, work_y)
+
+        # Similar to the photoelectric lab, find deviations and normalize
+        diffs    = ((m * work_x + b) - work_y)**2 / (work_y**2)
+        meandiff = np.sum(np.sqrt(diffs)) / float(len(diffs))
+
+        if meandiff > tolerance:
+            work_x = work_x[:-1]
+            work_y = work_y[:-1]
+        else:
+            search = False
+
+    return m, b, sy, sm, sb, r
+
 def get_saltangles():
     '''
     Returns a formatted string with the angles for the alpha and beta peaks of NaCl
@@ -254,6 +292,23 @@ def plot_al():
 
     plt.axvline(peaks[0, 0], color='k', ls='-', label='$K_{\\alpha}$', alpha=0.5)
     plt.axvline(peaks[1, 0], color='k', ls='--', label='$K_{\\beta}$', alpha=0.5)
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
+def plot_cutoff():
+    plt.plot(inacl_deg, inacl_c1, 'k--', alpha=0.3)
+    plt.plot(inacl_deg, inacl_c2, 'k--', alpha=0.3)
+    plt.plot(inacl_deg, inacl_c3, 'k--', alpha=0.3)
+    plt.plot(inacl_deg, inacl_c4, 'k--', alpha=0.3)
+
+    m1, b1, sy1, sm1, sb1, r1 = find_cutoff(inacl_deg, inacl_c4, limit=21, tolerance=0.39)
+    x = np.linspace(3, 6, 1000)
+    plt.plot(x, m1*x + b,1 label=('r: %1.4f' % (r1)))
+
+    m2, b2, sy2, sm2, sb2, r2 = find_cutoff(inacl_deg, inacl_c3, limit=21, tolerance=0.3)
+    plt.plot(x, m2*x + b2, label=('r: %1.4f' % (r2)))
 
     plt.xlabel('Degrees')
     plt.ylabel('Counts / second')
