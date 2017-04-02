@@ -8,6 +8,7 @@ import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
 import math
+import codecs
 
 from os import path
 
@@ -114,19 +115,24 @@ def second_deriv(arr, i, dx):
 # All CSV data comes in the form of [theta, counts / s...]
 # each column after the first is a single run
 
-deg, calibrated = np.loadtxt(path.abspath('./bragg/calibrated.csv'), skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
+f = codecs.open(path.abspath('./bragg/calibrated.csv'), encoding='utf-8')
+deg, calibrated = np.loadtxt(f, skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
 
 # NaCl, varying current
-inacl_deg, inacl_c1, inacl_c2, inacl_c3, inacl_c4 = np.loadtxt(path.abspath('./bragg/SaltyCurrent.csv'), skiprows=1, delimiter=',', unpack=True)
+f = codecs.open(path.abspath('./bragg/SaltyCurrent.csv'), encoding='utf-8')
+inacl_deg, inacl_c1, inacl_c2, inacl_c3, inacl_c4 = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 # NaCl, varying voltage
-vnacl_deg, vnacl_c1, vnacl_c2, vnacl_c3, vnacl_c4, vnacl_c5 = np.loadtxt(path.abspath('./bragg/SaltyVoltage.csv'), skiprows=1, delimiter=',', unpack=True)
+f = codecs.open(path.abspath('./bragg/SaltyVoltage.csv'), encoding='utf-8')
+vnacl_deg, vnacl_c1, vnacl_c2, vnacl_c3, vnacl_c4, vnacl_c5 = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 # Al crystal sample
-alcry_deg, alcry_counts = np.loadtxt(path.abspath('./bragg/AlCrystal.csv'), skiprows=1, delimiter=',', unpack=True)
+f = codecs.open(path.abspath('./bragg/AlCrystal.csv'), encoding='utf-8')
+alcry_deg, alcry_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 # Al slab sample
-alslab_deg, alslab_counts = np.loadtxt(path.abspath('./bragg/AlNotCrystal.csv'), skiprows=1, delimiter=',', unpack=True)
+f = codecs.open(path.abspath('./bragg/AlNotCrystal.csv'), encoding='utf-8')
+alslab_deg, alslab_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
 #############################################################
 # 5. Lab-specific functions
@@ -223,6 +229,27 @@ def find_cutoff(x, y, limit=0, tolerance=0.1):
             search = False
 
     return m, b, sy, sm, sb, r
+
+def cutoff_point(x, y, limit, tolerance):
+    '''
+    For n sets of y datasets, compute the collective cutoff point
+
+    x: array
+    y: matrix (n arrays)
+    limit: array of start limit choices per each y set
+    tolerance: array of tolerance choices per each y set
+    '''
+
+    assert len(y) == len(limit) and len(y) == len(tolerance), 'All limit and tolerance values must match y data set length'
+
+    arr_x  = []
+    arr_sx = []
+
+    for i in range(len(y)):
+        m, b, sy, sm, sb, r = lsq(x, y[i])
+
+        x   = (-b / m)
+        sx2 = ((1. / m) * sy)**2. + ((-1. / m) * sb)**2. + ((b / m**2) * sm)**2.
 
 def get_saltangles():
     '''
