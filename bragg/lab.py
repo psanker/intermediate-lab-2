@@ -285,7 +285,7 @@ def get_saltangles():
     mub = np.mean(beta)
     sdb = np.std(beta)
 
-    return (u'α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
+    return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
 
 def plot_saltcurrent():
 
