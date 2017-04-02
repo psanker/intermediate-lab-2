@@ -230,7 +230,7 @@ def find_cutoff(x, y, limit=0, tolerance=0.1):
 
     return m, b, sy, sm, sb, r
 
-def cutoff_point(x, y, limit, tolerance):
+def cutoff_angle(x, y, lim=[], tol=[]):
     '''
     For n sets of y datasets, compute the collective cutoff point
 
@@ -240,16 +240,31 @@ def cutoff_point(x, y, limit, tolerance):
     tolerance: array of tolerance choices per each y set
     '''
 
-    assert len(y) == len(limit) and len(y) == len(tolerance), 'All limit and tolerance values must match y data set length'
+    assert len(y) == len(lim) and len(y) == len(tol), 'All limit and tolerance values must match y data set length'
 
     arr_x  = []
     arr_sx = []
+    arr_sy = []
 
     for i in range(len(y)):
-        m, b, sy, sm, sb, r = lsq(x, y[i])
+        m, b, sy, sm, sb, r = find_cutoff(x, y[i], limit=lim[i], tolerance=tol[i])
 
-        x   = (-b / m)
+        mux   = (-b / m)
         sx2 = ((1. / m) * sy)**2. + ((-1. / m) * sb)**2. + ((b / m**2) * sm)**2.
+
+        arr_x.append(mux)
+        arr_sx.append(sx2)
+        arr_sy.append(sy**2.)
+
+    arr_x  = np.array(arr_x)
+    arr_sx = np.array(arr_sx)
+    arr_sy = np.array(arr_sy)
+
+    mu = np.mean(arr_x)
+    sx = np.sqrt(np.sum(arr_sx / 4.))
+    sy = np.sqrt(np.sum(arr_sy / 4.))
+
+    return mu, sx, sy
 
 def get_saltangles():
     '''
@@ -286,6 +301,9 @@ def get_saltangles():
     sdb = np.std(beta)
 
     return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
+
+def get_cutoff():
+    return cutoff_angle(inacl_deg, y=[inacl_c4, inacl_c3], lim=[21, 21], tol=[0.39, 0.3])
 
 def plot_saltcurrent():
 
@@ -324,28 +342,20 @@ def plot_al():
     plt.ylabel('Counts / second')
     plt.legend(loc='upper left')
 
-def plot_cutoff():
+def plot_cutoffcurrent():
     plt.plot(inacl_deg, inacl_c1, 'k--', alpha=0.3)
     plt.plot(inacl_deg, inacl_c2, 'k--', alpha=0.3)
     plt.plot(inacl_deg, inacl_c3, 'k--', alpha=0.3)
     plt.plot(inacl_deg, inacl_c4, 'k--', alpha=0.3)
 
-    m1, b1, sy1, sm1, sb1, r1 = find_cutoff(inacl_deg, inacl_c4, limit=21, tolerance=0.39)
     x = np.linspace(3, 6, 1000)
+    m1, b1, sy1, sm1, sb1, r1 = find_cutoff(inacl_deg, inacl_c4, limit=21, tolerance=0.39)
     plt.plot(x, m1*x + b1, label=('r: %1.4f' % (r1)))
 
     m2, b2, sy2, sm2, sb2, r2 = find_cutoff(inacl_deg, inacl_c3, limit=21, tolerance=0.3)
     plt.plot(x, m2*x + b2, label=('r: %1.4f' % (r2)))
 
-    x1   = (-b1 / m1)
-    sx12 = ((1. / m1) * sy1)**2. + ((-1. / m1) * sb1)**2. + ((b1 / m1**2) * sm1)**2.
-
-    x2   = (-b2 / m2)
-    sx22 = ((1. / m2)*sy2)**2. + ((-1. / m2)*sb2)**2. + ((b2 / m2**2)*sm2)**2.
-
-    xavg  = (x1 + x2) / 2
-    sxavg = np.sqrt((sx12 / 4.) + (sx22 / 4.))
-    syavg = np.sqrt((sy1 / 2.)**2. + (sy2 / 2.)**2.)
+    xavg, sxavg, syavg = cutoff_angle(inacl_deg, y=[inacl_c4, inacl_c3], lim=[21, 21], tol=[0.39, 0.3])
 
     plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='go', ecolor='k', label=(u'%1.3f ± %1.3f°' % (xavg, sxavg)))
 
@@ -353,3 +363,40 @@ def plot_cutoff():
     plt.ylabel('Counts / second')
     plt.legend(loc='upper left')
     plt.xlim(xmin=3, xmax=6.5)
+
+def plot_cutoffvoltage():
+    plt.plot(vnacl_deg, vnacl_c2, 'k--', alpha=0.3)
+    plt.plot(vnacl_deg, vnacl_c3, 'k--', alpha=0.3)
+    plt.plot(vnacl_deg, vnacl_c4, 'k--', alpha=0.3)
+    plt.plot(vnacl_deg, vnacl_c5, 'k--', alpha=0.3)
+
+    x = np.linspace(3, 8, 1000)
+
+    m1, b1, sy1, sm1, sb1, r1 = find_cutoff(vnacl_deg, vnacl_c2, limit=40, tolerance=0.95)
+    plt.plot(x, m1*x + b1, label=('r: %1.4f' % (r1)))
+
+    m2, b2, sy2, sm2, sb2, r2 = find_cutoff(vnacl_deg, vnacl_c3, limit=29, tolerance=0.5)
+    plt.plot(x, m2*x + b2, label=('r: %1.4f' % (r2)))
+
+    m3, b3, sy3, sm3, sb3, r3 = find_cutoff(vnacl_deg, vnacl_c4, limit=20, tolerance=0.5)
+    plt.plot(x, m3*x + b3, label=('r: %1.4f' % (r3)))
+
+    m4, b4, sy4, sm4, sb4, r4 = find_cutoff(vnacl_deg, vnacl_c5, limit=15, tolerance=0.25)
+    plt.plot(x, m4*x + b4, label=('r: %1.4f' % (r4)))
+
+    xavg, sxavg, syavg = cutoff_angle(vnacl_deg, [vnacl_c2], lim=[40], tol=[0.95])
+    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='bo', ecolor='k', label=(u'%1.3f ± %1.3f°' % (xavg, sxavg)))
+
+    xavg, sxavg, syavg = cutoff_angle(vnacl_deg, [vnacl_c3], lim=[29], tol=[0.5])
+    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='o', color='#f39131', ecolor='k', label=(u'%1.3f ± %1.3f°' % (xavg, sxavg)))
+
+    xavg, sxavg, syavg = cutoff_angle(vnacl_deg, [vnacl_c4], lim=[20], tol=[0.5])
+    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='go', ecolor='k', label=(u'%1.3f ± %1.3f°' % (xavg, sxavg)))
+
+    xavg, sxavg, syavg = cutoff_angle(vnacl_deg, [vnacl_c5], lim=[15], tol=[0.25])
+    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='ro', ecolor='k', label=(u'%1.3f ± %1.3f°' % (xavg, sxavg)))
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+    plt.xlim(xmin=3, xmax=8)
