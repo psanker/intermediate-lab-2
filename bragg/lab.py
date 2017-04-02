@@ -285,7 +285,7 @@ def get_saltangles():
     mub = np.mean(beta)
     sdb = np.std(beta)
 
-    return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
+    return (u'α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
 
 def plot_saltcurrent():
 
@@ -347,7 +347,7 @@ def plot_cutoff():
     sxavg = np.sqrt((sx12 / 4.) + (sx22 / 4.))
     syavg = np.sqrt((sy1 / 2.)**2. + (sy2 / 2.)**2.)
 
-    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='go', ecolor='k', label=('%1.3f ± %1.3f°' % (xavg, sxavg)))
+    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='go', ecolor='k', label=(u'%1.3f ± %1.3f°' % (xavg, sxavg)))
 
     plt.xlabel('Degrees')
     plt.ylabel('Counts / second')
