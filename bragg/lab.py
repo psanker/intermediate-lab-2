@@ -305,11 +305,24 @@ def plot_cutoff():
 
     m1, b1, sy1, sm1, sb1, r1 = find_cutoff(inacl_deg, inacl_c4, limit=21, tolerance=0.39)
     x = np.linspace(3, 6, 1000)
-    plt.plot(x, m1*x + b,1 label=('r: %1.4f' % (r1)))
+    plt.plot(x, m1*x + b1, label=('r: %1.4f' % (r1)))
 
     m2, b2, sy2, sm2, sb2, r2 = find_cutoff(inacl_deg, inacl_c3, limit=21, tolerance=0.3)
     plt.plot(x, m2*x + b2, label=('r: %1.4f' % (r2)))
 
+    x1   = (-b1 / m1)
+    sx12 = ((1. / m1) * sy1)**2. + ((-1. / m1) * sb1)**2. + ((b1 / m1**2) * sm1)**2.
+
+    x2   = (-b2 / m2)
+    sx22 = ((1. / m2)*sy2)**2. + ((-1. / m2)*sb2)**2. + ((b2 / m2**2)*sm2)**2.
+
+    xavg  = (x1 + x2) / 2
+    sxavg = np.sqrt((sx12 / 4.) + (sx22 / 4.))
+    syavg = np.sqrt((sy1 / 2.)**2. + (sy2 / 2.)**2.)
+
+    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='go', ecolor='k', label=('%1.3f ± %1.3f°' % (xavg, sxavg)))
+
     plt.xlabel('Degrees')
     plt.ylabel('Counts / second')
     plt.legend(loc='upper left')
+    plt.xlim(xmin=3, xmax=6.5)
