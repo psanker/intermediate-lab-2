@@ -221,3 +221,40 @@ def get_saltangles():
     sdb = np.std(beta)
 
     return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
+
+def plot_saltcurrent():
+
+    plt.plot(inacl_deg, inacl_c1, 'b-', label='$0.4 mA$')
+    plt.plot(inacl_deg, inacl_c2, 'r-', label='$0.6 mA$')
+    plt.plot(inacl_deg, inacl_c3, 'g-', label='$0.8 mA$')
+    plt.plot(inacl_deg, inacl_c4, 'm-', label='$1.0 mA$')
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
+def plot_saltvoltage():
+
+    plt.plot(vnacl_deg, vnacl_c1, 'k--', label='$15 keV$', alpha=0.5)
+    plt.plot(vnacl_deg, vnacl_c2, 'b-', label='$20 keV$')
+    plt.plot(vnacl_deg, vnacl_c3, 'r-', label='$25 keV$')
+    plt.plot(vnacl_deg, vnacl_c4, 'g-', label='$30 keV$')
+    plt.plot(vnacl_deg, vnacl_c5, 'm-', label='$35 keV$')
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
+def plot_al():
+
+    peaks = find_peaks(alcry_deg, alcry_counts)
+
+    plt.plot(alcry_deg, alcry_counts, 'b-', label='Al crystal')
+    plt.plot(alslab_deg, alslab_counts, 'r-', label='Al slab')
+
+    plt.axvline(peaks[0, 0], color='k', ls='-', label='$K_{\\alpha}$', alpha=0.5)
+    plt.axvline(peaks[1, 0], color='k', ls='--', label='$K_{\\beta}$', alpha=0.5)
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
