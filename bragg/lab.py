@@ -116,6 +116,12 @@ def second_deriv(arr, i, dx):
 
 deg, calibrated = np.loadtxt(path.abspath('./bragg/calibrated.csv'), skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
 
+# NaCl, varying current
+inacl_deg, inacl_c1, inacl_c2, inacl_c3, inacl_c4 = np.loadtxt(path.abspath('./bragg/SaltyCurrent.csv'), skiprows=1, delimiter=',', unpack=True)
+
+# NaCl, varying voltage
+vnacl_deg, vnacl_c1, vnacl_c2, vnacl_c3, vnacl_c4, vnacl_c5 = np.loadtxt(path.abspath('./bragg/SaltyVoltage.csv'), skiprows=1, delimiter=',', unpack=True)
+
 # Al crystal sample
 alcry_deg, alcry_counts = np.loadtxt(path.abspath('./bragg/AlCrystal.csv'), skiprows=1, delimiter=',', unpack=True)
 
@@ -180,6 +186,38 @@ def find_peaks(x, y):
 
     return np.array(filtered_maxima)
 
+def get_saltangles():
+    '''
+    Returns a formatted string with the angles for the alpha and beta peaks of NaCl
+    '''
 
-def get_dummy():
-    return find_peaks(alcry_deg, alcry_counts)
+    ic1 = find_peaks(inacl_deg, inacl_c1)
+    ic2 = find_peaks(inacl_deg, inacl_c2)
+    ic3 = find_peaks(inacl_deg, inacl_c3)
+    ic4 = find_peaks(inacl_deg, inacl_c4)
+
+    # Something's fucky with vc1; do not use
+    vc2 = find_peaks(vnacl_deg, vnacl_c2)
+    vc3 = find_peaks(vnacl_deg, vnacl_c3)
+    vc4 = find_peaks(vnacl_deg, vnacl_c4)
+    vc5 = find_peaks(vnacl_deg, vnacl_c5)
+
+    concat = np.array([ic1, ic2, ic3, ic4, vc2, vc3, vc4, vc5])
+
+    alpha  = []
+    beta   = []
+
+    for i in range(len(concat)):
+        alpha.append(concat[i][0][0])
+        beta.append(concat[i][1][0])
+
+    alpha = np.array(alpha)
+    beta  = np.array(beta)
+
+    mua = np.mean(alpha)
+    sda = np.std(alpha)
+
+    mub = np.mean(beta)
+    sdb = np.std(beta)
+
+    return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
