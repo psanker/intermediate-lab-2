@@ -104,16 +104,225 @@ def second_deriv(arr, i, dx):
         raise Exception('Cannot perform second derivative at endpoints')
 
     else:
-        return (arr[i + 1] - 2.*arr[i] + arr[i - 1]) / dx
+        return (arr[i + 1] - 2. * arr[i] + arr[i - 1]) / dx
 
 
 #############################################################
 # 4. Data
 #############################################################
-deg, calibrated = np.loadtxt(path.abspath(
-    './bragg/calibrated.csv'), skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
 
+# All CSV data comes in the form of [theta, counts / s...]
+# each column after the first is a single run
+
+deg, calibrated = np.loadtxt(path.abspath('./bragg/calibrated.csv'), skiprows=1, delimiter=',', usecols=(0, 5), unpack=True)
+
+# NaCl, varying current
+inacl_deg, inacl_c1, inacl_c2, inacl_c3, inacl_c4 = np.loadtxt(path.abspath('./bragg/SaltyCurrent.csv'), skiprows=1, delimiter=',', unpack=True)
+
+# NaCl, varying voltage
+vnacl_deg, vnacl_c1, vnacl_c2, vnacl_c3, vnacl_c4, vnacl_c5 = np.loadtxt(path.abspath('./bragg/SaltyVoltage.csv'), skiprows=1, delimiter=',', unpack=True)
+
+# Al crystal sample
+alcry_deg, alcry_counts = np.loadtxt(path.abspath('./bragg/AlCrystal.csv'), skiprows=1, delimiter=',', unpack=True)
+
+# Al slab sample
+alslab_deg, alslab_counts = np.loadtxt(path.abspath('./bragg/AlNotCrystal.csv'), skiprows=1, delimiter=',', unpack=True)
 
 #############################################################
 # 5. Lab-specific functions
 #############################################################
+
+def find_peaks(x, y):
+    '''
+    Finds peaks of dataset by combing through potential maxima (using a second derivative test)
+    and then picks out the 2 largest maxima, the values representing Ka and Kb
+    '''
+
+    if len(x) != len(y):
+        raise Exception('Cannot have arrays of differing length')
+
+    if len(x) < 3:
+        raise Exception('Not enough data points')
+
+    # Concatenate the two arrays into a matrix and transpose so that each kth index corresponds to a pair of coordinates
+    concat = np.array([np.array(x), np.array(y)]).T
+
+    maxima = []
+    dx     = concat[1,0] - concat[0,0]
+
+    for k in range(len(concat)):
+
+        # Reject the endpoints
+        if k == 0:
+            continue
+        elif k == len(concat) - 1:
+            break
+
+        # Perform second deriv test to filter out minima and saddle points
+        sd = (concat[k+1, 1] - 2.*concat[k, 1] + concat[k - 1, 1]) / dx
+
+        if sd < 0:
+            if concat[k - 1, 1] < concat[k, 1] and concat[k + 1, 1] < concat[k, 1]:
+                maxima.append(concat[k])
+
+    # Now, return the two largest maxima, corresponding to the Ka and Kb points
+    filtered_maxima = []
+
+    for i in range(2):
+        foo = 0 # dummy index to keep track of index with max value
+
+        for j in range(len(maxima)):
+            # Reject endpoints again
+            if j == 0:
+                continue
+            elif j == len(maxima) - 1:
+                break
+
+            if maxima[j][1] > maxima[foo][1]:
+                foo = j
+
+        filtered_maxima.append(maxima[foo])
+        maxima = np.delete(maxima, foo, 0)
+
+    return np.array(filtered_maxima)
+
+def find_cutoff(x, y, limit=0, tolerance=0.1):
+    '''
+    Find a linear fit which approximately finds the voltage cutoff point
+    '''
+
+    work_x = x[limit:]
+    work_y = y[limit:]
+
+    assert len(work_x) == len(work_y), 'Array dimensions must match to find cutoff'
+
+    # Before beginning, set all 0 terms to machine zero
+    for i in range(len(work_x)):
+        if work_x[i] == 0.0:
+            work_x[i] = ZERO
+
+        if work_y[i] == 0.0:
+            work_y[i] = ZERO
+
+    m, b, sy, sm, sb, r = (0., 0., 0., 0., 0., 0.)
+    search = True
+
+    while (search):
+
+        # Generate LSQ linear fit
+        m, b, sy, sm, sb, r = lsq(work_x, work_y)
+
+        # Similar to the photoelectric lab, find deviations and normalize
+        diffs    = ((m * work_x + b) - work_y)**2 / (work_y**2)
+        meandiff = np.sum(np.sqrt(diffs)) / float(len(diffs))
+
+        if meandiff > tolerance:
+            work_x = work_x[:-1]
+            work_y = work_y[:-1]
+        else:
+            search = False
+
+    return m, b, sy, sm, sb, r
+
+def get_saltangles():
+    '''
+    Returns a formatted string with the angles for the alpha and beta peaks of NaCl
+    '''
+
+    ic1 = find_peaks(inacl_deg, inacl_c1)
+    ic2 = find_peaks(inacl_deg, inacl_c2)
+    ic3 = find_peaks(inacl_deg, inacl_c3)
+    ic4 = find_peaks(inacl_deg, inacl_c4)
+
+    # Something's fucky with vc1; do not use
+    vc2 = find_peaks(vnacl_deg, vnacl_c2)
+    vc3 = find_peaks(vnacl_deg, vnacl_c3)
+    vc4 = find_peaks(vnacl_deg, vnacl_c4)
+    vc5 = find_peaks(vnacl_deg, vnacl_c5)
+
+    concat = np.array([ic1, ic2, ic3, ic4, vc2, vc3, vc4, vc5])
+
+    alpha  = []
+    beta   = []
+
+    for i in range(len(concat)):
+        alpha.append(concat[i][0][0])
+        beta.append(concat[i][1][0])
+
+    alpha = np.array(alpha)
+    beta  = np.array(beta)
+
+    mua = np.mean(alpha)
+    sda = np.std(alpha)
+
+    mub = np.mean(beta)
+    sdb = np.std(beta)
+
+    return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
+
+def plot_saltcurrent():
+
+    plt.plot(inacl_deg, inacl_c1, 'b-', label='$0.4 mA$')
+    plt.plot(inacl_deg, inacl_c2, 'r-', label='$0.6 mA$')
+    plt.plot(inacl_deg, inacl_c3, 'g-', label='$0.8 mA$')
+    plt.plot(inacl_deg, inacl_c4, 'm-', label='$1.0 mA$')
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
+def plot_saltvoltage():
+
+    plt.plot(vnacl_deg, vnacl_c1, 'k--', label='$15 keV$', alpha=0.5)
+    plt.plot(vnacl_deg, vnacl_c2, 'b-', label='$20 keV$')
+    plt.plot(vnacl_deg, vnacl_c3, 'r-', label='$25 keV$')
+    plt.plot(vnacl_deg, vnacl_c4, 'g-', label='$30 keV$')
+    plt.plot(vnacl_deg, vnacl_c5, 'm-', label='$35 keV$')
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
+def plot_al():
+
+    peaks = find_peaks(alcry_deg, alcry_counts)
+
+    plt.plot(alcry_deg, alcry_counts, 'b-', label='Al crystal')
+    plt.plot(alslab_deg, alslab_counts, 'r-', label='Al slab')
+
+    plt.axvline(peaks[0, 0], color='k', ls='-', label='$K_{\\alpha}$', alpha=0.5)
+    plt.axvline(peaks[1, 0], color='k', ls='--', label='$K_{\\beta}$', alpha=0.5)
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
+def plot_cutoff():
+    plt.plot(inacl_deg, inacl_c1, 'k--', alpha=0.3)
+    plt.plot(inacl_deg, inacl_c2, 'k--', alpha=0.3)
+    plt.plot(inacl_deg, inacl_c3, 'k--', alpha=0.3)
+    plt.plot(inacl_deg, inacl_c4, 'k--', alpha=0.3)
+
+    m1, b1, sy1, sm1, sb1, r1 = find_cutoff(inacl_deg, inacl_c4, limit=21, tolerance=0.39)
+    x = np.linspace(3, 6, 1000)
+    plt.plot(x, m1*x + b1, label=('r: %1.4f' % (r1)))
+
+    m2, b2, sy2, sm2, sb2, r2 = find_cutoff(inacl_deg, inacl_c3, limit=21, tolerance=0.3)
+    plt.plot(x, m2*x + b2, label=('r: %1.4f' % (r2)))
+
+    x1   = (-b1 / m1)
+    sx12 = ((1. / m1) * sy1)**2. + ((-1. / m1) * sb1)**2. + ((b1 / m1**2) * sm1)**2.
+
+    x2   = (-b2 / m2)
+    sx22 = ((1. / m2)*sy2)**2. + ((-1. / m2)*sb2)**2. + ((b2 / m2**2)*sm2)**2.
+
+    xavg  = (x1 + x2) / 2
+    sxavg = np.sqrt((sx12 / 4.) + (sx22 / 4.))
+    syavg = np.sqrt((sy1 / 2.)**2. + (sy2 / 2.)**2.)
+
+    plt.errorbar(xavg, 0, xerr=sxavg, yerr=syavg, fmt='go', ecolor='k', label=('%1.3f ± %1.3f°' % (xavg, sxavg)))
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+    plt.xlim(xmin=3, xmax=6.5)
