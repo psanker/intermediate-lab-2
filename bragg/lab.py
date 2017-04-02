@@ -266,11 +266,7 @@ def cutoff_angle(x, y, lim=[], tol=[]):
 
     return mu, sx, sy
 
-def get_saltangles():
-    '''
-    Returns a formatted string with the angles for the alpha and beta peaks of NaCl
-    '''
-
+def find_salt_angles():
     ic1 = find_peaks(inacl_deg, inacl_c1)
     ic2 = find_peaks(inacl_deg, inacl_c2)
     ic3 = find_peaks(inacl_deg, inacl_c3)
@@ -300,13 +296,33 @@ def get_saltangles():
     mub = np.mean(beta)
     sdb = np.std(beta)
 
+    return mua, sda, mub, sdb
+
+def get_saltangles():
+    mua, sda, mub, sdb = find_salt_angles()
     return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
 
-def get_cutoff():
-    return cutoff_angle(inacl_deg, y=[inacl_c4, inacl_c3], lim=[21, 21], tol=[0.39, 0.3])
+def get_currentl():
+    mua, sda, mub, sdb = find_salt_angles()
+
+    a = 0.564e-9
+
+    l  = (a * np.sin((PI / 180.) * mua)) / 2. # Alpha drop is n = 2 -> n = 1
+    sl = ((PI / 180.) * (a * np.cos((PI / 180.) * mua)) / 2.) * sda
+
+    return l, sl
+
+def get_h():
+    l, sl = get_currentl()
+
+    hm  = ((30e3 * q_e.value) / c.value) * l # hm to not overwrite the constant above
+    shm = ((30e3 * q_e.value) / c.value) * sl
+
+    return hm, shm
 
 def plot_saltcurrent():
 
+    plt.figure()
     plt.plot(inacl_deg, inacl_c1, 'b-', label='$0.4 mA$')
     plt.plot(inacl_deg, inacl_c2, 'r-', label='$0.6 mA$')
     plt.plot(inacl_deg, inacl_c3, 'g-', label='$0.8 mA$')
@@ -318,6 +334,7 @@ def plot_saltcurrent():
 
 def plot_saltvoltage():
 
+    plt.figure()
     plt.plot(vnacl_deg, vnacl_c1, 'k--', label='$15 keV$', alpha=0.5)
     plt.plot(vnacl_deg, vnacl_c2, 'b-', label='$20 keV$')
     plt.plot(vnacl_deg, vnacl_c3, 'r-', label='$25 keV$')
@@ -332,6 +349,7 @@ def plot_al():
 
     peaks = find_peaks(alcry_deg, alcry_counts)
 
+    plt.figure()
     plt.plot(alcry_deg, alcry_counts, 'b-', label='Al crystal')
     plt.plot(alslab_deg, alslab_counts, 'r-', label='Al slab')
 
@@ -343,6 +361,7 @@ def plot_al():
     plt.legend(loc='upper left')
 
 def plot_cutoffcurrent():
+    plt.figure()
     plt.plot(inacl_deg, inacl_c1, 'k--', alpha=0.3)
     plt.plot(inacl_deg, inacl_c2, 'k--', alpha=0.3)
     plt.plot(inacl_deg, inacl_c3, 'k--', alpha=0.3)
@@ -365,6 +384,7 @@ def plot_cutoffcurrent():
     plt.xlim(xmin=3, xmax=6.5)
 
 def plot_cutoffvoltage():
+    plt.figure()
     plt.plot(vnacl_deg, vnacl_c2, 'k--', alpha=0.3)
     plt.plot(vnacl_deg, vnacl_c3, 'k--', alpha=0.3)
     plt.plot(vnacl_deg, vnacl_c4, 'k--', alpha=0.3)
