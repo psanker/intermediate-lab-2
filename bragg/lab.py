@@ -504,9 +504,6 @@ def plot_lambdamin():
     lengths, slengths = find_wavelength(thetamins, sxavgs)
     m, b, sy, sm, sb, r = lsq(1./volts, lengths)
 
-    ache  = (m * q_e.value) / c.value
-    sache = (sm * q_e.value) / c.value
-
 
     plt.errorbar(1./volts, lengths, yerr=slengths, fmt='ro', ecolor='k', label='Minimum Wavelengths')
     plt.plot(x, m*x + b, label='Linear Fit')
@@ -517,7 +514,7 @@ def plot_lambdamin():
     plt.legend(loc='upper left')
 
 def get_ache():
-    volts = np.array([20, 25, 30, 35]) #keV
+    volts = np.array([20, 25, 30, 35])*(10**3) #keV
     xavg2, sxavg2, syavg2 = cutoff_angle(vnacl_deg, [vnacl_c2], lim=[40], tol=[0.95])
 
     xavg3, sxavg3, syavg3 = cutoff_angle(vnacl_deg, [vnacl_c3], lim=[29], tol=[0.5])
@@ -537,6 +534,16 @@ def get_ache():
     sache = (sm * q_e.value) / c.value
 
     return ache, sache
+
+def plot_h_value():
+    ache, sache = get_ache()
+
+    x = np.linspace(ache - 4*sache, ache + 4*sache, 1000)
+
+    plt.figure()
+    plt.plot(x, mlab.normpdf(x, ache, sache), 'b-', label=('$\\bar{h}$=%1.3e $\pm$ %1.3e $J\cdot s$' % (ache, sache)))
+    plt.axvline(h.value, ls='--', color='k', label=('$h$=%1.3e $J\cdot s$' % (h.value)))
+    plt.legend(loc='upper right')
 
 def plot_moseleytest():
     mua, sda, mub, sdb = find_salt_angles()
