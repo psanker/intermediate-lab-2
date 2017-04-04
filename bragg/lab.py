@@ -317,6 +317,12 @@ def moseley(n, Z=42):
     linv = (Ryd.value)*((Z - 1)**2)*(1 - (1 / n)**2)
     return linv**(-1)
 
+def get_moseleya():
+    return moseley(2)
+
+def get_moseleyb():
+    return moseley(3)
+
 def get_saltangles():
     mua, sda, mub, sdb = find_salt_angles()
     return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
