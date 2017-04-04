@@ -491,7 +491,7 @@ def plot_moseleytest():
     moseley_a = moseley(2)
     moseley_b = moseley(3)
 
-    x = np.linspace(l_b - 4*sl_b, l_a + 4*sl_a, 1000)
+    x = np.linspace(l_b - 4*sl_b, l_a + 6*sl_a, 1000)
 
     plt.plot(x, mlab.normpdf(x, l_a, sl_a), 'b-', label='$K_{\\alpha}$')
     plt.plot(x, mlab.normpdf(x, l_b, sl_b), 'r-', label='$K_{\\beta}$')
