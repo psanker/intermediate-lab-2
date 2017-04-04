@@ -134,8 +134,13 @@ alcry_deg, alcry_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 f = io.open(path.abspath('./bragg/AlNotCrystal.csv'), encoding='utf-8')
 alslab_deg, alslab_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
+<<<<<<< HEAD
 volts = np.array([15, 20, 25, 30, 35]) #keV
 currents = np.array([0.4, 0.6, 0.8, 1.0]) #mA
+=======
+# Lattice constant for NaCl crystal
+nacl_a = 0.564e-9
+>>>>>>> origin/master
 
 #############################################################
 # 5. Lab-specific functions
@@ -306,12 +311,11 @@ def get_saltangles():
     return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
 
 def get_currentl():
-    mua, sda, mub, sdb = find_salt_angles()
+    
+    t, dt, dy = cutoff_angle(inacl_deg, y=[inacl_c4, inacl_c3], lim=[21, 21], tol=[0.39, 0.3])
 
-    a = 0.564e-9
-
-    l  = (a * np.sin((PI / 180.) * mua)) / 2. # Alpha drop is n = 2 -> n = 1
-    sl = ((PI / 180.) * (a * np.cos((PI / 180.) * mua)) / 2.) * sda
+    l  = (nacl_a * np.sin((PI / 180.) * t))
+    sl = ((PI / 180.) * (nacl_a * np.cos((PI / 180.) * t))) * dt
 
     return l, sl
 
