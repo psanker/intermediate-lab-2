@@ -485,6 +485,7 @@ def plot_cutoffvoltage():
 def plot_lambdamin():
 
     volts = np.array([20, 25, 30, 35]) #keV
+    x = np.linspace(0.025, .055, 1000)
 
     plt.figure()
 
@@ -501,12 +502,41 @@ def plot_lambdamin():
     syavgs = np.array([syavg2, syavg3, syavg4, syavg5])
 
     lengths, slengths = find_wavelength(thetamins, sxavgs)
+    m, b, sy, sm, sb, r = lsq(1./volts, lengths)
 
-    plt.errorbar(1./volts, lengths, yerr=slengths, fmt='ro', ecolor='k', label=('Minimum Wavelengths'))
+    ache  = (m * q_e.value) / c.value
+    sache = (sm * q_e.value) / c.value
 
-    plt.xlabel('Wavelengths (nm)')
-    plt.ylabel('1/Volts')
+
+    plt.errorbar(1./volts, lengths, yerr=slengths, fmt='ro', ecolor='k', label='Minimum Wavelengths')
+    plt.plot(x, m*x + b, label='Linear Fit')
+    plt.annotate('$y=mx + b$\n$m=$%1.3e$\pm$%1.3e\n$b=$%1.3e$\pm$%1.3e\n$r=$%f' % (m, sm, b, sb, r), xy=(0.0427, 4.98*(10**(-11))), xytext=(0.0427, 3.05*(10**(-11))), arrowprops=dict(facecolor='black', headwidth=6, width=.2, shrink=0.05))
+
+    plt.xlabel('1/Volts')
+    plt.ylabel('Wavelengths (nm)')
     plt.legend(loc='upper left')
+
+def get_ache():
+    volts = np.array([20, 25, 30, 35]) #keV
+    xavg2, sxavg2, syavg2 = cutoff_angle(vnacl_deg, [vnacl_c2], lim=[40], tol=[0.95])
+
+    xavg3, sxavg3, syavg3 = cutoff_angle(vnacl_deg, [vnacl_c3], lim=[29], tol=[0.5])
+
+    xavg4, sxavg4, syavg4 = cutoff_angle(vnacl_deg, [vnacl_c4], lim=[20], tol=[0.5])
+
+    xavg5, sxavg5, syavg5 = cutoff_angle(vnacl_deg, [vnacl_c5], lim=[15], tol=[0.25])
+
+    thetamins = np.array([xavg2, xavg3, xavg4, xavg5])
+    sxavgs = np.array([sxavg2, sxavg3, sxavg4, sxavg5])
+    syavgs = np.array([syavg2, syavg3, syavg4, syavg5])
+
+    lengths, slengths = find_wavelength(thetamins, sxavgs)
+    m, b, sy, sm, sb, r = lsq(1./volts, lengths)
+
+    ache  = (m * q_e.value) / c.value
+    sache = (sm * q_e.value) / c.value
+
+    return ache, sache
 
 def plot_moseleytest():
     mua, sda, mub, sdb = find_salt_angles()
