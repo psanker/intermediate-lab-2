@@ -134,6 +134,9 @@ alcry_deg, alcry_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 f = io.open(path.abspath('./bragg/AlNotCrystal.csv'), encoding='utf-8')
 alslab_deg, alslab_counts = np.loadtxt(f, skiprows=1, delimiter=',', unpack=True)
 
+volts = np.array([15, 20, 25, 30, 35]) #keV
+currents = np.array([0.4, 0.6, 0.8, 1.0]) #mA
+
 #############################################################
 # 5. Lab-specific functions
 #############################################################
@@ -344,6 +347,54 @@ def plot_saltvoltage():
     plt.xlabel('Degrees')
     plt.ylabel('Counts / second')
     plt.legend(loc='upper left')
+
+def plot_voltpeaks():
+
+    t = 0.1 #s
+    peak1 = find_peaks(vnacl_deg, vnacl_c1)
+    peak2 = find_peaks(vnacl_deg, vnacl_c2)
+    peak3 = find_peaks(vnacl_deg, vnacl_c3)
+    peak4 = find_peaks(vnacl_deg, vnacl_c4)
+    peak5 = find_peaks(vnacl_deg, vnacl_c5)
+
+    alphaPeaks = np.array([peak1[0, 1], peak2[0, 1], peak3[0, 1], peak4[0, 1], peak5[0, 1]])
+    alphaerrors = np.sqrt(alphaPeaks / t)
+
+    betaPeaks = np.array([peak1[1, 1], peak2[1, 1], peak3[1, 1], peak4[1, 1], peak5[1, 1]])
+    betaerrors = np.sqrt(betaPeaks / t)
+
+    plt.figure()
+    plt.errorbar(volts, alphaPeaks, yerr=alphaerrors, fmt='r.', ecolor='k', alpha=0.5, label='$K_{\\alpha}$ Peaks')
+    plt.errorbar(volts, betaPeaks, yerr=betaerrors, fmt='b.', ecolor='k', alpha=0.5, label='$K_{\\beta}$ Peaks')
+
+
+    plt.xlabel('Voltage (keV)')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
+def plot_currentpeaks():
+
+    t = 0.1 #s
+    peak1 = find_peaks(inacl_deg, inacl_c1)
+    peak2 = find_peaks(inacl_deg, inacl_c2)
+    peak3 = find_peaks(inacl_deg, inacl_c3)
+    peak4 = find_peaks(inacl_deg, inacl_c4)
+
+    alphaPeaks = np.array([peak1[0, 1], peak2[0, 1], peak3[0, 1], peak4[0, 1]])
+    alphaerrors = np.sqrt(alphaPeaks / t)
+
+    betaPeaks = np.array([peak1[1, 1], peak2[1, 1], peak3[1, 1], peak4[1, 1]])
+    betaerrors = np.sqrt(betaPeaks / t)
+
+    plt.figure()
+    plt.errorbar(currents, alphaPeaks, yerr=alphaerrors, fmt='r.', ecolor='k', alpha=0.5, label='$K_{\\alpha}$ Peaks')
+    plt.errorbar(currents, betaPeaks, yerr=betaerrors, fmt='b.', ecolor='k', alpha=0.5, label='$K_{\\beta}$ Peaks')
+
+
+    plt.xlabel('Current (mA)')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
+
 
 def plot_al():
 
