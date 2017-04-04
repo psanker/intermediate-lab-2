@@ -33,6 +33,7 @@ TWO_PI = 2 * PI
 
 kB = const.k_B
 R = const.R
+Ryd = const.Ryd
 NA = const.N_A
 G = const.G
 g = const.g0
@@ -306,18 +307,24 @@ def find_salt_angles():
 
     return mua, sda, mub, sdb
 
+def find_wavelength(ang, sang):
+    l  = (nacl_a * np.sin((PI / 180.) * ang))
+    sl = ((PI / 180.) * (nacl_a * np.cos((PI / 180.) * ang))) * sang
+
+    return l, sl
+
+def moseley(n, Z=42):
+    linv = (Ryd.value)*((Z - 1)**2)*(1 - (1 / n)**2)
+    return linv**(-1)
+
 def get_saltangles():
     mua, sda, mub, sdb = find_salt_angles()
     return ('α: %1.3f ± %1.3f°\nβ: %1.3f ± %1.3f°' % (mua, sda, mub, sdb))
 
 def get_currentl():
-
     t, dt, dy = cutoff_angle(inacl_deg, y=[inacl_c4, inacl_c3], lim=[21, 21], tol=[0.39, 0.3])
 
-    l  = (nacl_a * np.sin((PI / 180.) * t))
-    sl = ((PI / 180.) * (nacl_a * np.cos((PI / 180.) * t))) * dt
-
-    return l, sl
+    return find_wavelength(t, dt)
 
 def get_h():
     l, sl = get_currentl()
@@ -399,7 +406,6 @@ def plot_currentpeaks():
     plt.ylabel('Counts / second')
     plt.legend(loc='upper left')
 
-
 def plot_al():
 
     peaks = find_peaks(alcry_deg, alcry_counts)
@@ -475,6 +481,25 @@ def plot_cutoffvoltage():
     plt.ylabel('Counts / second')
     plt.legend(loc='upper left')
     plt.xlim(xmin=3, xmax=8)
+
+def plot_moseleytest():
+    mua, sda, mub, sdb = find_salt_angles()
+
+    l_a, sl_a = find_wavelength(mua, sda)
+    l_b, sl_b = find_wavelength(mub, sdb)
+
+    moseley_a = moseley(2)
+    moseley_b = moseley(3)
+
+    x = np.linspace(l_b - 4*sl_b, l_a + 4*sl_a, 1000)
+
+    plt.plot(x, mlab.normpdf(x, l_a, sl_a), 'b-', label='$K_{\\alpha}$')
+    plt.plot(x, mlab.normpdf(x, l_b, sl_b), 'r-', label='$K_{\\beta}$')
+
+    plt.axvline(moseley_a, ls='--', color='c', alpha=0.5, label='Moseley $\\alpha$')
+    plt.axvline(moseley_b, ls='--', color='m', alpha=0.5, label='Moseley $\\beta$')
+    plt.xlabel('Wavelength (m)')
+    plt.legend(loc='upper left')
 
 def plot_calibrated():
     peaky = find_peaks(deg, calibrated)
