@@ -317,11 +317,19 @@ def moseley(n, Z=42):
     linv = (Ryd.value)*((Z - 1)**2)*(1 - (1 / n)**2)
     return linv**(-1)
 
+
 def get_moseleya():
-    return moseley(n=2, Z=42)
+    return moseley(n=2., Z=42)
 
 def get_moseleyb():
-    return moseley(n=3, Z=42)
+    return moseley(n=3., Z=42)
+
+def get_bragglambda():
+    mua, sda, mub, sdb = find_salt_angles()
+
+    l_a, sl_a = find_wavelength(mua, sda)
+    l_b, sl_b = find_wavelength(mub, sdb)
+    return l_a, sl_a, l_b, sl_b
 
 def get_saltangles():
     mua, sda, mub, sdb = find_salt_angles()
