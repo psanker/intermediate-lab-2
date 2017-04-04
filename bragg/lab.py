@@ -537,11 +537,14 @@ def get_ache():
 
 def plot_h_value():
     ache, sache = get_ache()
+    hm, shm     = get_h()
 
-    x = np.linspace(ache - 4*sache, ache + 4*sache, 1000)
+    x = np.linspace(hm - 3*shm, hm + 3*shm, 1000)
 
     plt.figure()
-    plt.plot(x, mlab.normpdf(x, ache, sache), 'b-', label=('$\\bar{h}$=%1.3e $\pm$ %1.3e $J\cdot s$' % (ache, sache)))
+    plt.plot(x, mlab.normpdf(x, ache, sache), 'b-', label=('$\\bar{h}_1$=%1.3e $\pm$ %1.3e $J\cdot s$' % (ache, sache)))
+    plt.plot(x, mlab.normpdf(x, hm, shm), 'r-', label=('$\\bar{h}_2$=%1.3e $\pm$ %1.3e $J\cdot s$' % (hm, shm)))
+
     plt.axvline(h.value, ls='--', color='k', label=('$h$=%1.3e $J\cdot s$' % (h.value)))
     plt.legend(loc='upper right')
 
@@ -556,6 +559,7 @@ def plot_moseleytest():
 
     x = np.linspace(l_b - 4*sl_b, l_a + 6*sl_a, 1000)
 
+    plt.figure()
     plt.plot(x, mlab.normpdf(x, l_a, sl_a), 'b-', label='$K_{\\alpha}$')
     plt.plot(x, mlab.normpdf(x, l_b, sl_b), 'r-', label='$K_{\\beta}$')
 
