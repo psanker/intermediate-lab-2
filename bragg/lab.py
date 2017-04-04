@@ -318,10 +318,10 @@ def moseley(n, Z=42):
     return linv**(-1)
 
 def get_moseleya():
-    return moseley(2)
+    return moseley(n=2, Z=42)
 
 def get_moseleyb():
-    return moseley(3)
+    return moseley(n=3, Z=42)
 
 def get_saltangles():
     mua, sda, mub, sdb = find_salt_angles()
