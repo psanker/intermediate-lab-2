@@ -482,6 +482,32 @@ def plot_cutoffvoltage():
     plt.legend(loc='upper left')
     plt.xlim(xmin=3, xmax=8)
 
+def plot_lambdamin():
+
+    volts = np.array([20, 25, 30, 35]) #keV
+
+    plt.figure()
+
+    xavg2, sxavg2, syavg2 = cutoff_angle(vnacl_deg, [vnacl_c2], lim=[40], tol=[0.95])
+
+    xavg3, sxavg3, syavg3 = cutoff_angle(vnacl_deg, [vnacl_c3], lim=[29], tol=[0.5])
+
+    xavg4, sxavg4, syavg4 = cutoff_angle(vnacl_deg, [vnacl_c4], lim=[20], tol=[0.5])
+
+    xavg5, sxavg5, syavg5 = cutoff_angle(vnacl_deg, [vnacl_c5], lim=[15], tol=[0.25])
+
+    thetamins = np.array([xavg2, xavg3, xavg4, xavg5])
+    sxavgs = np.array([sxavg2, sxavg3, sxavg4, sxavg5])
+    syavgs = np.array([syavg2, syavg3, syavg4, syavg5])
+
+    lengths, slengths = find_wavelength(thetamins, sxavgs)
+
+    plt.errorbar(lengths, 1./volts, xerr=slengths, fmt='ro', ecolor='k', label=('Minimum Wavelengths'))
+
+    plt.xlabel('Wavelengths (nm)')
+    plt.ylabel('1/Volts')
+    plt.legend(loc='upper left')
+
 def plot_moseleytest():
     mua, sda, mub, sdb = find_salt_angles()
 
