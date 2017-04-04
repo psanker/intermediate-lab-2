@@ -531,7 +531,7 @@ def get_ache():
     m, b, sy, sm, sb, r = lsq(1./volts, lengths)
 
     ache  = (m * q_e.value) / c.value
-    sache = (sm * q_e.value) / c.value
+    sache = np.sqrt((sm/m)**2 + (np.mean(slengths)/np.mean(lengths))**2)*ache
 
     return ache, sache
 
