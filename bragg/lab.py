@@ -420,3 +420,14 @@ def plot_cutoffvoltage():
     plt.ylabel('Counts / second')
     plt.legend(loc='upper left')
     plt.xlim(xmin=3, xmax=8)
+
+def plot_calibrated():
+    peaky = find_peaks(deg, calibrated)
+    plt.figure()
+    plt.plot(deg, calibrated, 'b-', label='Calibration Data')
+    plt.axvline(peaky[0, 0], color='k', ls='-', label='$K_{\\alpha}$', alpha=0.5)
+    plt.axvline(peaky[1, 0], color='k', ls='--', label='$K_{\\beta}$', alpha=0.5)
+
+    plt.xlabel('Degrees')
+    plt.ylabel('Counts / second')
+    plt.legend(loc='upper left')
