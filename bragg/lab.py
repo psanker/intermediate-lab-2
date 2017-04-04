@@ -502,7 +502,7 @@ def plot_lambdamin():
 
     lengths, slengths = find_wavelength(thetamins, sxavgs)
 
-    plt.errorbar(lengths, 1./volts, xerr=slengths, fmt='ro', ecolor='k', label=('Minimum Wavelengths'))
+    plt.errorbar(1./volts, lengths, yerr=slengths, fmt='ro', ecolor='k', label=('Minimum Wavelengths'))
 
     plt.xlabel('Wavelengths (nm)')
     plt.ylabel('1/Volts')
