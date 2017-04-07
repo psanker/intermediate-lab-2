@@ -29,7 +29,8 @@ LABS = ['halflife',
         'franckhertz',
         'twoslit',
         'esr',
-        'bragg']
+        'bragg',
+        'lightspeed']
 
 current_labs = {}
 selected_lab = None
