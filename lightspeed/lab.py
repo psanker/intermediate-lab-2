@@ -90,6 +90,21 @@ def lsq(x, y):
     # y = mx + b; r is correlation
     return m, b, sy, sm, sb, r
 
+def mc_sample(N, f, fmax, xmin=-5, xmax=5):
+    '''
+    Find N values that fall under the function 'f'
+    '''
+
+    ret = []
+
+    while len(ret) < N:
+        x, y = (np.random.uniform(low=xmin, high=xmax), np.random.uniform(low=0.0, high=fmax))
+
+        if y <= f(x):
+            ret.append(x)
+
+    return np.array(ret)
+
 #############################################################
 # 4. Data
 #############################################################
@@ -99,8 +114,8 @@ mirror_dist = .05 #meters
 xtra = source_dist - mirror_dist
 temp = 20.0 #celsius
 
-air_x = np.array([101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0]) * 2 * 1e-2 + xtra
-air_t = np.array([0.0, 36.0, 96.0, 176.0, 236.0, 316.0, 400.0, 436.0, 536.0, 616.0]) * 1e-12 #seconds
+air_x = (np.array([101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0]) * 2. * 1e-2) + xtra
+air_t = np.array([0.0, 36.0, 96.0, 176.0, 236.0, 316.0, 400.0, 436.0, 536.0, 616.0]) * 1e-12 # seconds
 xi = 56.5 * 1e-2 + xtra
 water_xf = np.array([89.0, 87.3, 86.4, 86.8]) * 1e-2 + xtra
 poly_xf = np.array([78.0, 77.9, 79.0, 77.9]) * 1e-2 + xtra
@@ -112,6 +127,13 @@ timeerr = 5.7 * 1e-12
 #############################################################
 # 5. Lab-specific functions
 #############################################################
+
+def bimodal(x):
+    z   = 2. * np.sqrt(2. * PI)
+
+    val = np.exp((-(x - 1.)**2.) / 2.) + np.exp((-(x + 1.)**2.) / 2.)
+
+    return (1. / z) * val
 
 def find_refraction(x, l):
     n  = (np.mean(x)-xi + l) / l
@@ -153,3 +175,48 @@ def plot_airspeed():
     plt.xlabel('Time Delay (s)')
     plt.ylabel('Path Length (m)')
     plt.legend(loc='upper left')
+
+def plot_anglesim():
+    # bimodal max val;
+    bmax = 1. / np.sqrt(2. * PI * np.exp(1.))
+
+    # degrees to radians conversion factor
+    conv = PI / 180.
+
+    # Monte-Carlo sample with bimodal kernel function
+    samp = mc_sample(1000, bimodal, bmax, xmin=-10, xmax=10)
+
+    time = []
+    dis  = []
+
+    for i in range(len(air_x)):
+
+        for j in range(len(samp)):
+            # Test length based on angular deflection
+            l = air_x[i] * np.cos(conv * samp[j])
+
+            time.append(air_t[i])
+            dis.append(l)
+
+    time = np.array(time)
+    dis  = np.array(dis)
+
+    m, b, sy, sm, sb, r = lsq(time, dis)
+    x = np.linspace(min(time), max(time), 1000)
+
+    plt.figure()
+    plt.plot(time, dis, 'r.', label='Bimodal simulation')
+    plt.plot(x, m*x + b, 'b-', label='Linear fit')
+
+    plt.annotate('$y = mx + b$\n$m = %1.3e\\pm%1.3e$\n$b = %1.3e\\pm%1.3e$\n$r = %1.4f$' % (m, sm, b, sb, r),
+                 xy = (3e-10, 2.16), xytext = (1.e-10, 2.20),
+                 arrowprops = dict(
+                    facecolor = 'k',
+                    headwidth = 6,
+                    width  = .2,
+                    shrink = 0.05
+                 ))
+
+    plt.legend(loc='lower right')
+    plt.xlabel('Time ($s$)')
+    plt.ylabel('Distance ($m$)')
