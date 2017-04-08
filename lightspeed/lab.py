@@ -90,6 +90,54 @@ def lsq(x, y):
     # y = mx + b; r is correlation
     return m, b, sy, sm, sb, r
 
+def maxima(f, xmin, xmax, N=1000):
+    '''
+    Numerically find the maxima on a domain [xmin, xmax]
+
+    Returns array of all x values which are maxima for f
+    '''
+
+    x    = np.linspace(xmin, xmax, N)
+    dx   = x[1] - x[0]
+    maxs = []
+
+    for i in range(len(x)):
+        # Reject endpoints
+        if i == 0:
+            continue
+        elif i == len(x) - 1:
+            break
+
+        sd = (f(x[i + 1]) - (2. * f(x[i])) + f(x[i - 1])) / dx
+
+        if sd < 0.:
+            if f(x[i - 1]) < f(x[i]) and f(x[i + 1]) < f(x[i]):
+                maxs.append(x[i])
+                continue
+
+            # Now for some derivative magic
+            d_next = (f(x[i + 1]) - f(x[i])) / dx
+            d_last = (f(x[i]) - f(x[i - 1])) / dx
+
+            d_avg  = (d_next + d_last) / 2.
+
+            if d_avg == 0.0 or d_next == 0.0:
+                maxs.append(x[i])
+            elif d_next < 0.0 and d_last > 0.0:
+                # weighted avg based on the slope
+                total = np.abs(d_last) + np.abs(d_next)
+                a_l   = np.abs(d_last) / total
+                a_n   = np.abs(d_next) / total
+
+                avg1  = (x[i - 1] + x[i]) / 2.
+                avg2  = (x[i + 1] + x[i]) / 2.
+
+                avg = (a_l * avg1) + (a_n * avg2)
+
+                maxs.append(avg)
+
+    return np.array(maxs)
+
 def mc_sample(N, f, fmax, xmin=-5, xmax=5):
     '''
     Find N values that fall under the function 'f'
@@ -135,10 +183,22 @@ def bimodal(x):
 
     return (1. / z) * val
 
+# Test function to see at what point things would get screwy
+def bimodal2(x):
+    s   = 5.
+    z   = 10. * np.sqrt(2. * PI)
+
+    val = np.exp((-(x - 10.)**2.) / (2. * s**2.)) + np.exp((-(x + 10.)**2.) / (2. * s**2.))
+
+    return (1. / z) * val
+
 def find_refraction(x, l):
     n  = (np.mean(x)-xi + l) / l
     sn = np.sqrt((np.std(x)/np.mean(x))**2 + (.001/.565)**2)*n
     return n, sn
+
+def get_dummy():
+    return bimodal2(maxima(bimodal2, xmin=-20, xmax=20, N=10000))
 
 def get_refraction():
     w, sw = find_refraction(water_xf, .5) #accepted value is 1.3, ours is 1.62
@@ -177,7 +237,7 @@ def plot_airspeed():
     plt.legend(loc='upper left')
 
 def plot_anglesim():
-    # bimodal max val;
+    # bimodal max val -- numerically computed
     bmax = 1. / np.sqrt(2. * PI * np.exp(1.))
 
     # degrees to radians conversion factor
@@ -203,6 +263,55 @@ def plot_anglesim():
 
     m, b, sy, sm, sb, r = lsq(time, dis)
     x = np.linspace(min(time), max(time), 1000)
+
+    plt.figure()
+    plt.plot(time, dis, 'r.', label='Bimodal simulation')
+    plt.plot(x, m*x + b, 'b-', label='Linear fit')
+
+    plt.annotate('$y = mx + b$\n$m = %1.3e\\pm%1.3e$\n$b = %1.3e\\pm%1.3e$\n$r = %1.4f$' % (m, sm, b, sb, r),
+                 xy = (3e-10, 2.16), xytext = (1.e-10, 2.20),
+                 arrowprops = dict(
+                    facecolor = 'k',
+                    headwidth = 6,
+                    width  = .2,
+                    shrink = 0.05
+                 ))
+
+    plt.legend(loc='lower right')
+    plt.xlabel('Time ($s$)')
+    plt.ylabel('Distance ($m$)')
+
+def plot_anglesim2():
+    '''
+    Test function to see if strangely wonky bimodal results would reproduce speed of light error
+    '''
+
+    # bimodal max val -- numerically computed
+    bmax = np.mean(bimodal2(maxima(bimodal2, -11., 11., N=10000)))
+
+    # degrees to radians conversion factor
+    conv = PI / 180.
+
+    # Monte-Carlo sample with bimodal kernel function
+    samp = mc_sample(1000, bimodal2, bmax, xmin=-20, xmax=20)
+
+    time = []
+    dis  = []
+
+    for i in range(len(air_x)):
+
+        for j in range(len(samp)):
+            # Test length based on angular deflection
+            l = air_x[i] * np.cos(conv * samp[j])
+
+            time.append(air_t[i])
+            dis.append(l)
+
+    time = np.array(time)
+    dis  = np.array(dis)
+
+    m, b, sy, sm, sb, r = lsq(time, dis)
+    x = np.linspace(min(time), max(time), 100)
 
     plt.figure()
     plt.plot(time, dis, 'r.', label='Bimodal simulation')
