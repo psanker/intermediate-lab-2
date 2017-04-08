@@ -93,3 +93,16 @@ def lsq(x, y):
 #############################################################
 # 4. Data
 #############################################################
+
+source_dist = .095 #meters
+mirror_dist = .05 #meters
+xtra = source_dist - mirror_dist
+temp = 20.0 #celsius
+
+air_x = np.array([101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0]) * 1e-2 + xtra
+air_t = np.array([0.0, 36.0, 96.0, 176.0, 236.0, 316.0, 400.0, 436.0, 536.0, 616.0]) * 1e-9 #seconds
+xi = np.ones([4])*56.5 * 1e-2 + xtra
+water_xf = np.array([89.0, 87.3, 86.4, 86.8]) * 1e-2 + xtra
+poly_xf = np.array([78.0, 77.9, 79.0, 77.9]) * 1e-2 + xtra
+glass_xf = np.array([84.0, 83.6, 86.7, 85.3]) * 1e-2 + xtra
+unknown_xf = np.array([106.3, 109.9, 107.7, 107.8]) * 1e-2 + xtra
