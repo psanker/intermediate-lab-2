@@ -101,7 +101,7 @@ temp = 20.0 #celsius
 
 air_x = np.array([101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0]) * 2 * 1e-2 + xtra
 air_t = np.array([0.0, 36.0, 96.0, 176.0, 236.0, 316.0, 400.0, 436.0, 536.0, 616.0]) * 1e-12 #seconds
-xi = np.ones([4])*56.5 * 1e-2 + xtra
+xi = 56.5 * 1e-2 + xtra
 water_xf = np.array([89.0, 87.3, 86.4, 86.8]) * 1e-2 + xtra
 poly_xf = np.array([78.0, 77.9, 79.0, 77.9]) * 1e-2 + xtra
 glass_xf = np.array([84.0, 83.6, 86.7, 85.3]) * 1e-2 + xtra
@@ -112,6 +112,35 @@ timeerr = 5.7 * 1e-12
 #############################################################
 # 5. Lab-specific functions
 #############################################################
+
+def find_refraction(x, l):
+    n  = (np.mean(x)-xi + l) / l
+    sn = np.sqrt((np.std(x)/np.mean(x))**2 + (.001/.565)**2)*n
+    return n, sn
+
+def get_refraction():
+    w, sw = find_refraction(water_xf, .5) #accepted value is 1.3, ours is 1.62
+    p, sp = find_refraction(poly_xf, .5) #accepted value is 1.4, ours is 1.43
+    g, sg = find_refraction(glass_xf, .5) #accepted value is 1.49, ours is 1.57
+    u, su = find_refraction(unknown_xf, .2) #something here is very wrong, the value is 3.57
+    return ('Water: %1.3f ± %1.3f\nPoly: %1.3f ± %1.3f\nGlass: %1.3f ± %1.3f\nUnknown %1.3f ± %1.3f' % (w, sw, p, sp, g, sg, u, su))
+
+def get_speeds():
+    c, b, sy, sc, sb, r = lsq(air_t, air_x)
+    w, sw = find_refraction(water_xf, .5)
+    p, sp = find_refraction(poly_xf, .5)
+    g, sg = find_refraction(glass_xf, .5)
+    u, su = find_refraction(unknown_xf, .2)
+    wspeed  = c / w
+    swspeed = np.sqrt((sw/w)**2 + (sc/c)**2)*wspeed
+    pspeed  = c / p
+    spspeed = np.sqrt((sp/p)**2 + (sc/c)**2)*pspeed
+    gspeed  = c / g
+    sgspeed = np.sqrt((sg/g)**2 + (sc/c)**2)*gspeed
+    uspeed  = c / u
+    suspeed = np.sqrt((su/u)**2 + (sc/c)**2)*uspeed
+
+    return ('Air: %1.f ± %1.f\nWater: %1.f ± %1.f\nPoly: %1.f ± %1.f\nGlass: %1.f ± %1.f\nUnknown %1.f ± %1.f' % (c, sc, wspeed, swspeed, pspeed, spspeed, gspeed, sgspeed, uspeed, suspeed))
 
 def plot_airspeed():
     x = np.linspace(0, 616*1e-12, 1000)
