@@ -228,20 +228,21 @@ def get_refraction():
 
 def get_speeds():
     c, b, sy, sc, sb, r = lsq(air_t, air_x)
+    dc = np.mean(np.sqrt((sc/c)**2 + (disterr/air_x)**2)*c)
     w, sw = find_refraction(water_xf, .5)
     p, sp = find_refraction(poly_xf, .5)
     g, sg = find_refraction(glass_xf, .5)
     u, su = find_refraction(unknown_xf, .2)
     wspeed  = c / w
-    swspeed = np.sqrt((sw/w)**2 + (sc/c)**2)*wspeed
+    swspeed = np.sqrt((sw/w)**2 + (dc/c)**2)*wspeed
     pspeed  = c / p
-    spspeed = np.sqrt((sp/p)**2 + (sc/c)**2)*pspeed
+    spspeed = np.sqrt((sp/p)**2 + (dc/c)**2)*pspeed
     gspeed  = c / g
-    sgspeed = np.sqrt((sg/g)**2 + (sc/c)**2)*gspeed
+    sgspeed = np.sqrt((sg/g)**2 + (dc/c)**2)*gspeed
     uspeed  = c / u
-    suspeed = np.sqrt((su/u)**2 + (sc/c)**2)*uspeed
+    suspeed = np.sqrt((su/u)**2 + (dc/c)**2)*uspeed
 
-    return ('Air: %1.f ± %1.f\nWater: %1.f ± %1.f\nPoly: %1.f ± %1.f\nGlass: %1.f ± %1.f\nUnknown %1.f ± %1.f' % (c, sc, wspeed, swspeed, pspeed, spspeed, gspeed, sgspeed, uspeed, suspeed))
+    return ('Air: %1.f ± %1.f\nWater: %1.f ± %1.f\nPoly: %1.f ± %1.f\nGlass: %1.f ± %1.f\nUnknown %1.f ± %1.f' % (c, dc, wspeed, swspeed, pspeed, spspeed, gspeed, sgspeed, uspeed, suspeed))
 
 def plot_airspeed():
     x = np.linspace(0, 616*1e-12, 1000)
@@ -306,7 +307,7 @@ def plot_anglesim2():
     '''
 
     # bimodal max val -- numerically computed
-    bmax = np.mean(bimodal2(maxima(bimodal2, -11., 11., N=10000)))
+    bmax = np.mean(bimodal2(maxima(bimodal2, -11., 11.)))
 
     # degrees to radians conversion factor
     conv = PI / 180.
