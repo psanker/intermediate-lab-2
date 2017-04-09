@@ -90,12 +90,14 @@ def lsq(x, y):
     # y = mx + b; r is correlation
     return m, b, sy, sm, sb, r
 
-def maxima(f, xmin, xmax, N=1000):
+def maxima(f, xmin, xmax, precision=1e-5):
     '''
     Numerically find the maxima on a domain [xmin, xmax]
 
     Returns array of all x values which are maxima for f
     '''
+
+    N    = int(1. / precision)
 
     x    = np.linspace(xmin, xmax, N)
     dx   = x[1] - x[0]
@@ -125,9 +127,10 @@ def maxima(f, xmin, xmax, N=1000):
                 maxs.append(x[i])
             elif d_next < 0.0 and d_last > 0.0:
                 # weighted avg based on the slope
-                total = np.abs(d_last) + np.abs(d_next)
-                a_l   = np.abs(d_last) / total
-                a_n   = np.abs(d_next) / total
+                # The flatter the slope, the more weight it should have
+                total = np.abs(1. / d_last) + np.abs(1. / d_next)
+                a_l   = np.abs(1. / d_last) / total
+                a_n   = np.abs(1. / d_next) / total
 
                 avg1  = (x[i - 1] + x[i]) / 2.
                 avg2  = (x[i + 1] + x[i]) / 2.
@@ -152,6 +155,22 @@ def mc_sample(N, f, fmax, xmin=-5, xmax=5):
             ret.append(x)
 
     return np.array(ret)
+
+def mc_integrate(N, f, fmax, xmin, xmax):
+    '''
+    Monte-Carlo integrator for distribution functions
+    '''
+
+    tot_area = fmax * (xmax - xmin)
+    count    = 0
+
+    for i in range(N):
+        x, y = (np.random.uniform(low=xmin, high=xmax), np.random.uniform(low=0.0, high=fmax))
+
+        if y <= f(x):
+            count += 1
+
+    return tot_area * (float(count) / float(N))
 
 #############################################################
 # 4. Data
@@ -198,7 +217,7 @@ def find_refraction(x, l):
     return n, sn
 
 def get_dummy():
-    return bimodal2(maxima(bimodal2, xmin=-20, xmax=20, N=10000))
+    return maxima(bimodal2, xmin=-20, xmax=20, precision=5e-5)
 
 def get_refraction():
     w, sw = find_refraction(water_xf, .5) #accepted value is 1.3, ours is 1.62
