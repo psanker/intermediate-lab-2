@@ -234,6 +234,27 @@ def get_refraction():
     u, su = find_refraction(unknown_xf, .2) #something here is very wrong, the value is 3.57
     return ('Water: %1.3f ± %1.3e\nPoly: %1.3f ± %1.3e\nGlass: %1.3f ± %1.3e\nUnknown %1.3f ± %1.3e' % (w, sw, p, sp, g, sg, u, su))
 
+def get_expspeeds():
+    n_air   = 1.
+    n_water = 1.33
+    n_glass = 1.49
+    n_poly  = 1.60
+
+    c_air   = c.value / n_air
+    c_water = c.value / n_water
+    c_glass = c.value / n_glass
+    c_poly  = c.value / n_poly
+
+    return ('Air: %1.3e\nWater: %1.3e\nAcrylic: %1.3e\nPolydimethylsiloxane: %1.3e' % (c_air, c_water, c_glass, c_poly))
+
+def get_expindex():
+    n_air   = 1.
+    n_water = 1.33
+    n_glass = 1.49
+    n_poly  = 1.60
+
+    return ('Air: ~%1.3f\nWater (20C): %1.3f\nAcrylic: %1.3f\nPolydimethylsiloxane: %1.3f' % (n_air, n_water, n_glass, n_poly))
+
 def get_speeds():
     c, b, sy, sc, sb, r = lsq(air_t, air_x)
     dc = np.sqrt(np.mean((sc/c)**2) + np.mean((disterr/air_x)**2) + np.mean((timeerr/air_t[1:])**2))*c
