@@ -272,88 +272,55 @@ def plot_anglesim():
     conv = PI / 180.
 
     # Monte-Carlo sample with bimodal kernel function
-    samp = mc_sample(1000, bimodal, bmax, xmin=-10, xmax=10)
+    samp1 = mc_sample(10, bimodal, bmax, xmin=-10, xmax=10)
+    samp2 = mc_sample(100, bimodal, bmax, xmin=-10, xmax=10)
 
-    time = []
-    dis  = []
+    time1 = []
+    dis1  = []
+
+    time2 = []
+    dis2  = []
 
     for i in range(len(air_x)):
 
-        for j in range(len(samp)):
+        for j in range(len(samp1)):
             # Test length based on angular deflection
-            l = air_x[i] * np.cos(conv * samp[j])
+            # -> = L
+            # <- = L(1 + sin(theta))
+            l = (air_x[i] / 2.) + ((air_x[i] / 2.) * (1. + np.sin(conv * samp1[j])))
 
-            time.append(air_t[i])
-            dis.append(l)
+            time1.append(air_t[i])
+            dis1.append(l)
 
-    time = np.array(time)
-    dis  = np.array(dis)
+        for k in range(len(samp2)):
+            l = (air_x[i] / 2.) + ((air_x[i] / 2.) * (1. + np.sin(conv * samp2[k])))
 
-    m, b, sy, sm, sb, r = lsq(time, dis)
-    x = np.linspace(min(time), max(time), 1000)
+            time2.append(air_t[i])
+            dis2.append(l)
 
-    plt.figure()
-    plt.plot(time, dis, 'r.', label='Bimodal simulation')
-    plt.plot(x, m*x + b, 'b-', label='Linear fit')
+    time1 = np.array(time1)
+    dis1  = np.array(dis1)
 
-    plt.annotate('$y = mx + b$\n$m = %1.3e\\pm%1.3e$\n$b = %1.3e\\pm%1.3e$\n$r = %1.4f$' % (m, sm, b, sb, r),
-                 xy = (3e-10, 2.16), xytext = (1.e-10, 2.20),
-                 arrowprops = dict(
-                    facecolor = 'k',
-                    headwidth = 6,
-                    width  = .2,
-                    shrink = 0.05
-                 ))
+    time2 = np.array(time2)
+    dis2  = np.array(dis2)
 
-    plt.legend(loc='lower right')
-    plt.xlabel('Time ($s$)')
-    plt.ylabel('Distance ($m$)')
+    m1, b1, sy1, sm1, sb1, r1 = lsq(time1, dis1)
+    m2, b2, sy2, sm2, sb2, r2 = lsq(time2, dis2)
 
-# def plot_anglesim2():
-#     '''
-#     Test function to see if strangely wonky bimodal results would reproduce speed of light error
-#     '''
-#
-#     # bimodal max val -- numerically computed
-#     bmax = np.mean(bimodal2(maxima(bimodal2, -11., 11.)))
-#
-#     # degrees to radians conversion factor
-#     conv = PI / 180.
-#
-#     # Monte-Carlo sample with bimodal kernel function
-#     samp = mc_sample(1000, bimodal2, bmax, xmin=-20, xmax=20)
-#
-#     time = []
-#     dis  = []
-#
-#     for i in range(len(air_x)):
-#
-#         for j in range(len(samp)):
-#             # Test length based on angular deflection
-#             l = air_x[i] * np.cos(conv * samp[j])
-#
-#             time.append(air_t[i])
-#             dis.append(l)
-#
-#     time = np.array(time)
-#     dis  = np.array(dis)
-#
-#     m, b, sy, sm, sb, r = lsq(time, dis)
-#     x = np.linspace(min(time), max(time), 100)
-#
-#     plt.figure()
-#     plt.plot(time, dis, 'r.', label='Bimodal simulation')
-#     plt.plot(x, m*x + b, 'b-', label='Linear fit')
-#
-#     plt.annotate('$y = mx + b$\n$m = %1.3e\\pm%1.3e$\n$b = %1.3e\\pm%1.3e$\n$r = %1.4f$' % (m, sm, b, sb, r),
-#                  xy = (3e-10, 2.16), xytext = (1.e-10, 2.20),
-#                  arrowprops = dict(
-#                     facecolor = 'k',
-#                     headwidth = 6,
-#                     width  = .2,
-#                     shrink = 0.05
-#                  ))
-#
-#     plt.legend(loc='lower right')
-#     plt.xlabel('Time ($s$)')
-#     plt.ylabel('Distance ($m$)')
+    x = np.linspace(min(time1), max(time1), 1000)
+
+    fig, axarr = plt.subplots(2, sharex=True)
+
+    axarr[0].plot(time1, dis1, 'r.', label='Sim: $N = 10$')
+    axarr[0].plot(x, m1*x + b1, 'b-', label=('$m=%1.3e\pm%1.3e$' % (m1, sm1)))
+
+    axarr[1].plot(time2, dis2, 'r.', label='Sim: $N = 100$')
+    axarr[1].plot(x, m2*x + b2, 'b-', label=('$m=%1.3e\pm%1.3e$' % (m2, sm2)))
+
+    axarr[0].legend(loc='lower right')
+    axarr[1].legend(loc='lower right')
+
+    axarr[1].set_xlabel('Time ($s$)')
+
+    axarr[0].set_ylabel('Distance ($m$)')
+    axarr[1].set_ylabel('Distance ($m$)')
