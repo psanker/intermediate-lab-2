@@ -232,7 +232,7 @@ def get_refraction():
     p, sp = find_refraction(poly_xf, .5) #accepted value is 1.4, ours is 1.43
     g, sg = find_refraction(glass_xf, .5) #accepted value is 1.49, ours is 1.57
     u, su = find_refraction(unknown_xf, .2) #something here is very wrong, the value is 3.57
-    return ('Water: %1.3f ± %1.3f\nPoly: %1.3f ± %1.3f\nGlass: %1.3f ± %1.3f\nUnknown %1.3f ± %1.3f' % (w, sw, p, sp, g, sg, u, su))
+    return ('Water: %1.3f ± %1.3e\nPoly: %1.3f ± %1.3e\nGlass: %1.3f ± %1.3e\nUnknown %1.3f ± %1.3e' % (w, sw, p, sp, g, sg, u, su))
 
 def get_speeds():
     c, b, sy, sc, sb, r = lsq(air_t, air_x)
@@ -250,7 +250,7 @@ def get_speeds():
     uspeed  = c / u
     suspeed = np.sqrt((su/u)**2 + (dc/c)**2)*uspeed
 
-    return ('Air: %1.f ± %1.f\nWater: %1.f ± %1.f\nPoly: %1.f ± %1.f\nGlass: %1.f ± %1.f\nUnknown %1.f ± %1.f' % (c, dc, wspeed, swspeed, pspeed, spspeed, gspeed, sgspeed, uspeed, suspeed))
+    return ('Air: %1.3e ± %1.3e\nWater: %1.3e ± %1.3e\nPoly: %1.3e ± %1.3e\nGlass: %1.3e ± %1.3e\nUnknown %1.3e ± %1.3e' % (c, dc, wspeed, swspeed, pspeed, spspeed, gspeed, sgspeed, uspeed, suspeed))
 
 def plot_airspeed():
     x = np.linspace(0, 616*1e-12, 1000)
