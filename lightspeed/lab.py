@@ -156,21 +156,30 @@ def mc_sample(N, f, fmax, xmin=-5, xmax=5):
 
     return np.array(ret)
 
-def mc_integrate(N, f, fmax, xmin, xmax):
+def mc_integrate(f, fmax, xmin, xmax, recursions=10, precision=1e-3):
     '''
     Monte-Carlo integrator for distribution functions
     '''
 
-    tot_area = fmax * (xmax - xmin)
-    count    = 0
+    N = int(1. / precision)
 
-    for i in range(N):
-        x, y = (np.random.uniform(low=xmin, high=xmax), np.random.uniform(low=0.0, high=fmax))
+    tot_area = fmax * (float(xmax) - float(xmin))
+    area = []
 
-        if y <= f(x):
-            count += 1
+    for i in range(recursions):
+        count = 0
 
-    return tot_area * (float(count) / float(N))
+        x, y  = (np.random.uniform(low=xmin, high=xmax, size=N), np.random.uniform(low=0.0, high=fmax, size=N))
+
+        for i in range(N):
+            if y[i] <= f(x[i]):
+                count += 1
+
+        area.append(tot_area * (float(count) / float(N)))
+
+    area = np.array(area)
+
+    return np.mean(area), np.std(area)
 
 #############################################################
 # 4. Data
@@ -202,14 +211,10 @@ def bimodal(x):
 
     return (1. / z) * val
 
-# Test function to see at what point things would get screwy
-def bimodal2(x):
-    s   = 5.
-    z   = 10. * np.sqrt(2. * PI)
+def test_kernel(x):
+    s    = 5.
 
-    val = np.exp((-(x - 10.)**2.) / (2. * s**2.)) + np.exp((-(x + 10.)**2.) / (2. * s**2.))
-
-    return (1. / z) * val
+    return np.exp((-(x - 10.)**2.) / (2. * s**2.)) + np.exp((-(x + 10.)**2.) / (2. * s**2.))
 
 def find_refraction(x, l):
     n  = (np.mean(x)-xi + l) / l
@@ -217,7 +222,10 @@ def find_refraction(x, l):
     return n, sn
 
 def get_dummy():
-    return maxima(bimodal2, xmin=-20, xmax=20, precision=5e-5)
+    maxes = test_kernel(maxima(test_kernel, -11, 11))
+    fmax  = np.mean(maxes)
+
+    return mc_integrate(test_kernel, fmax, -100, 100, recursions=100, precision=1e-4)
 
 def get_refraction():
     w, sw = find_refraction(water_xf, .5) #accepted value is 1.3, ours is 1.62
@@ -301,51 +309,51 @@ def plot_anglesim():
     plt.xlabel('Time ($s$)')
     plt.ylabel('Distance ($m$)')
 
-def plot_anglesim2():
-    '''
-    Test function to see if strangely wonky bimodal results would reproduce speed of light error
-    '''
-
-    # bimodal max val -- numerically computed
-    bmax = np.mean(bimodal2(maxima(bimodal2, -11., 11.)))
-
-    # degrees to radians conversion factor
-    conv = PI / 180.
-
-    # Monte-Carlo sample with bimodal kernel function
-    samp = mc_sample(1000, bimodal2, bmax, xmin=-20, xmax=20)
-
-    time = []
-    dis  = []
-
-    for i in range(len(air_x)):
-
-        for j in range(len(samp)):
-            # Test length based on angular deflection
-            l = air_x[i] * np.cos(conv * samp[j])
-
-            time.append(air_t[i])
-            dis.append(l)
-
-    time = np.array(time)
-    dis  = np.array(dis)
-
-    m, b, sy, sm, sb, r = lsq(time, dis)
-    x = np.linspace(min(time), max(time), 100)
-
-    plt.figure()
-    plt.plot(time, dis, 'r.', label='Bimodal simulation')
-    plt.plot(x, m*x + b, 'b-', label='Linear fit')
-
-    plt.annotate('$y = mx + b$\n$m = %1.3e\\pm%1.3e$\n$b = %1.3e\\pm%1.3e$\n$r = %1.4f$' % (m, sm, b, sb, r),
-                 xy = (3e-10, 2.16), xytext = (1.e-10, 2.20),
-                 arrowprops = dict(
-                    facecolor = 'k',
-                    headwidth = 6,
-                    width  = .2,
-                    shrink = 0.05
-                 ))
-
-    plt.legend(loc='lower right')
-    plt.xlabel('Time ($s$)')
-    plt.ylabel('Distance ($m$)')
+# def plot_anglesim2():
+#     '''
+#     Test function to see if strangely wonky bimodal results would reproduce speed of light error
+#     '''
+#
+#     # bimodal max val -- numerically computed
+#     bmax = np.mean(bimodal2(maxima(bimodal2, -11., 11.)))
+#
+#     # degrees to radians conversion factor
+#     conv = PI / 180.
+#
+#     # Monte-Carlo sample with bimodal kernel function
+#     samp = mc_sample(1000, bimodal2, bmax, xmin=-20, xmax=20)
+#
+#     time = []
+#     dis  = []
+#
+#     for i in range(len(air_x)):
+#
+#         for j in range(len(samp)):
+#             # Test length based on angular deflection
+#             l = air_x[i] * np.cos(conv * samp[j])
+#
+#             time.append(air_t[i])
+#             dis.append(l)
+#
+#     time = np.array(time)
+#     dis  = np.array(dis)
+#
+#     m, b, sy, sm, sb, r = lsq(time, dis)
+#     x = np.linspace(min(time), max(time), 100)
+#
+#     plt.figure()
+#     plt.plot(time, dis, 'r.', label='Bimodal simulation')
+#     plt.plot(x, m*x + b, 'b-', label='Linear fit')
+#
+#     plt.annotate('$y = mx + b$\n$m = %1.3e\\pm%1.3e$\n$b = %1.3e\\pm%1.3e$\n$r = %1.4f$' % (m, sm, b, sb, r),
+#                  xy = (3e-10, 2.16), xytext = (1.e-10, 2.20),
+#                  arrowprops = dict(
+#                     facecolor = 'k',
+#                     headwidth = 6,
+#                     width  = .2,
+#                     shrink = 0.05
+#                  ))
+#
+#     plt.legend(loc='lower right')
+#     plt.xlabel('Time ($s$)')
+#     plt.ylabel('Distance ($m$)')

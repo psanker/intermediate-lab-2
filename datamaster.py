@@ -12,6 +12,7 @@
 import signal
 import sys
 import getopt
+import os
 
 # importing matplotlib so datamaster prints all requested plots at once
 import matplotlib.pyplot as plt
@@ -23,14 +24,7 @@ init_printing(use_latex=True, use_unicode=True)
 
 cli_thread = True
 
-LABS = ['halflife',
-        'michelson',
-        'photoelectric',
-        'franckhertz',
-        'twoslit',
-        'esr',
-        'bragg',
-        'lightspeed']
+LABS = []
 
 current_labs = {}
 selected_lab = None
@@ -38,7 +32,6 @@ selected_lab = None
 def fetch_lab(name, load):
     obj = None
 
-    # TODO: remove this check in place of just seeing if the directory exists
     if name not in LABS:
         # Directly return None instead of obj
         print('Invalid lab name')
@@ -248,6 +241,10 @@ def handle_args(args):
         plt.show()
 
 def main(argv):
+    # Load in lab names
+    global LABS
+    LABS = [name for name in os.listdir('.') if os.path.isdir(name) and os.path.exists(os.path.join(name, 'lab.py'))]
+
     if len(argv) == 0:
         # register sigkill event and start looping CLI
         signal.signal(signal.SIGINT, exit_handle)
