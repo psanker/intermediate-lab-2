@@ -182,7 +182,7 @@ xtra = source_dist - mirror_dist
 temp = 20.0 #celsius
 
 air_x = (np.array([101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0, 109.0, 110.0]) * 2. * 1e-2) + xtra
-air_t = np.array([0.0, 36.0, 96.0, 176.0, 236.0, 316.0, 400.0, 436.0, 536.0, 616.0]) * 1e-12 # seconds
+air_t = np.array([0, 36.0, 96.0, 176.0, 236.0, 316.0, 400.0, 436.0, 536.0, 616.0]) * 1e-12 # seconds
 xi = 56.5 * 1e-2 + xtra
 water_xf = np.array([89.0, 87.3, 86.4, 86.8]) * 1e-2 + xtra
 poly_xf = np.array([78.0, 77.9, 79.0, 77.9]) * 1e-2 + xtra
@@ -228,7 +228,7 @@ def get_refraction():
 
 def get_speeds():
     c, b, sy, sc, sb, r = lsq(air_t, air_x)
-    dc = np.mean(np.sqrt((sc/c)**2 + (disterr/air_x)**2)*c)
+    dc = np.sqrt(np.mean((sc/c)**2) + np.mean((disterr/air_x)**2) + np.mean((timeerr/air_t[1:])**2))*c
     w, sw = find_refraction(water_xf, .5)
     p, sp = find_refraction(poly_xf, .5)
     g, sg = find_refraction(glass_xf, .5)
