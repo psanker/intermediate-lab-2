@@ -18,19 +18,19 @@ import os
 # importing matplotlib so datamaster prints all requested plots at once
 import matplotlib.pyplot as plt
 
-# Allows LaTeX output in Jupyter and in matplotlib
-# Importing this because it may be an environmental trigger
-from sympy import init_printing
-init_printing(use_latex=True, use_unicode=True)
+cli_thread   = True # If false, the CLI terminates; goes false upon SIGKILL
 
-cli_thread = True
-
-LABS = []
-
-current_labs = {}
-selected_lab = None
+LABS         = []   # List of all known labs given by subdirectories
+current_labs = {}   # Key-value memory of active labs
+selected_lab = None # Name of current selected lab; used for reloads
 
 def fetch_lab(name, load):
+    '''
+    * Internal *
+
+    Attempts to load a lab given an input name
+    Returns the initialized lab module or None if an error is encountered
+    '''
     obj = None
 
     if name not in LABS:
@@ -84,7 +84,11 @@ def load_lab(name):
     return obj
 
 def unload_lab(name):
-    # this is so dirty I feel so uncomfortable
+    '''
+    * Internal *
+
+    Removes all references of a lab from memory
+    '''
     rm = []
 
     global selected_lab
@@ -115,7 +119,6 @@ def select_lab(name, load=False):
         selected_lab = name
         print('Selected Lab: %s\n' % (selected_lab))
 
-
 def plot_var(var):
     if selected_lab is not None:
         obj = current_labs[selected_lab]
@@ -138,7 +141,6 @@ def plot_var(var):
         usage()
         return False
 
-
 def get_var(var):
     if selected_lab is not None:
         obj = current_labs[selected_lab]
@@ -159,11 +161,47 @@ def get_var(var):
         print('No selected lab')
         usage()
 
+def list():
+    print('Available labs:')
+
+    for s in LABS:
+        if selected_lab is not None and s == selected_lab:
+            print('> * %s' % (s))
+        else:
+            print('  * %s' % (s))
+
+    if selected_lab is not None:
+        obj   = current_labs[selected_lab]
+
+        gets  = []
+        plots = []
+
+        for e in dir(obj.lab):
+            if e.startswith('get_') and callable(getattr(obj.lab, str(e))):
+                gets.append(str(e).replace('get_', ''))
+            elif e.startswith('plot_') and callable(getattr(obj.lab, str(e))):
+                plots.append(str(e).replace('plot_', ''))
+
+        if len(gets) != 0 or len(plots) != 0:
+            print('----------------------------------')
+            print('Functions for \'%s\'' % (selected_lab))
+
+            if len(gets) != 0:
+                print('Gets:')
+
+                for i in range(len(gets)):
+                    print ('  * %s' % (gets[i]))
+
+            if len(plots) != 0:
+                print('Plots:')
+
+                for i in range(len(plots)):
+                    print ('  * %s' % (plots[i]))
 
 def usage():
     print('Usage: datamaster.py -s <name> [-g, -p] <data name>')
     print('\nCommands:\n  -h, --help: Prints out this help section')
-    print('  -l, --list: Lists all the available labs')
+    print('  -l, --list: Lists all the available labs and, if a lab is selected, all available gets and plots')
     print('  -s, --select <name>: Selects lab to compute data from')
     print('  -r, --reload: Reloads the selected lab from file')
     print('  -p, --plot <variable>: Calls a plotting function of form \"plot_<variable>\"')
@@ -209,10 +247,8 @@ def handle_args(args):
             return
 
         elif opt in ('-l', '--list'):
-            print('Available labs:')
-
-            for s in LABS:
-                print('  * %s' % (s))
+            list()
+            return
 
         elif opt in ('-s', '--select'):
             select_lab(arg)
