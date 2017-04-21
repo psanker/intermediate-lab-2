@@ -16,6 +16,8 @@ from matplotlib import mlab
 from matplotlib import patches
 import decimal as dec
 
+from numba import jit
+
 from scipy.optimize import curve_fit
 
 # Allows LaTeX output in Jupyter and in matplotlib
@@ -90,14 +92,12 @@ def lsq(x, y):
     # y = mx + b; r is correlation
     return m, b, sy, sm, sb, r
 
-def maxima(f, xmin, xmax, precision=1e-5):
+def maxima(f, xmin, xmax, N=1000):
     '''
     Numerically find the maxima on a domain [xmin, xmax]
 
     Returns array of all x values which are maxima for f
     '''
-
-    N    = int(1. / precision)
 
     x    = np.linspace(xmin, xmax, N)
     dx   = x[1] - x[0]
@@ -141,45 +141,38 @@ def maxima(f, xmin, xmax, precision=1e-5):
 
     return np.array(maxs)
 
-def mc_sample(N, f, fmax, xmin=-5, xmax=5):
+def mc_sample(N, f, fmax, xmin, xmax):
     '''
     Find N values that fall under the function 'f'
     '''
 
-    ret = []
+    ret   = np.empty(N)
+    count = 0
 
-    while len(ret) < N:
+    while count < N:
         x, y = (np.random.uniform(low=xmin, high=xmax), np.random.uniform(low=0.0, high=fmax))
 
         if y <= f(x):
-            ret.append(x)
+            ret[count] = x
+            count += 1
 
-    return np.array(ret)
+    return ret
 
-def mc_integrate(f, fmax, xmin, xmax, recursions=10, precision=1e-3):
+def mc_integrate(f, xmin, xmax, N=10000):
     '''
     Monte-Carlo integrator for distribution functions
     '''
 
-    N = int(1. / precision)
+    samples = np.random.uniform(low=xmin, high=xmax, size=N)
+    values  = np.empty(N)
 
-    tot_area = fmax * (float(xmax) - float(xmin))
-    area = []
+    R  = xmax - xmin
+    dx = R / float(N)
 
-    for i in range(recursions):
-        count = 0
+    values = f(samples)
+    s_int  = (R / np.sqrt(N)) * np.std(values, ddof=1)
 
-        x, y  = (np.random.uniform(low=xmin, high=xmax, size=N), np.random.uniform(low=0.0, high=fmax, size=N))
-
-        for i in range(N):
-            if y[i] <= f(x[i]):
-                count += 1
-
-        area.append(tot_area * (float(count) / float(N)))
-
-    area = np.array(area)
-
-    return np.mean(area), np.std(area)
+    return np.sum(values)*dx, s_int
 
 #############################################################
 # 4. Data
@@ -221,11 +214,11 @@ def find_refraction(x, l):
     sn = np.sqrt((np.std(x)/np.mean(x))**2 + (.001/.565)**2)*n
     return n, sn
 
-def get_dummy():
-    maxes = test_kernel(maxima(test_kernel, -11, 11))
-    fmax  = np.mean(maxes)
-
-    return mc_integrate(test_kernel, fmax, -100, 100, recursions=100, precision=1e-4)
+# def get_dummy():
+#     maxes = test_kernel(maxima(test_kernel, -11, 11))
+#     fmax  = np.mean(maxes)
+#
+#     return mc_integrate(test_kernel, fmax, -100, 100, recursions=100, precision=1e-4)
 
 def get_refraction():
     w, sw = find_refraction(water_xf, .5) #accepted value is 1.3, ours is 1.62

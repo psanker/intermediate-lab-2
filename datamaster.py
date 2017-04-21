@@ -9,6 +9,8 @@
 # |_____/ \__,_|\__\__,_|_|  |_|\__,_|___/\__\___|_|
 
 # A lab module loader for unified data analysis
+#
+# by Patrick Anker & Kaitlyn Morrell
 
 import signal
 import sys
@@ -79,6 +81,8 @@ def load_lab(name):
     except Exception as err:
         print('Lab analysis could not be loaded')
         print(str(err))
+
+        # Resets the object reference in case something weird happened
         obj = None
 
     return obj
@@ -93,8 +97,8 @@ def unload_lab(name):
 
     global selected_lab
 
-    if str(selected_lab) is name:
-        selected_lab = ''
+    if str(selected_lab) == name:
+        selected_lab = None
 
     # Filter submodules that belong to target lab, if it exists
     for mod in sys.modules.keys():
@@ -189,14 +193,14 @@ def list():
             if len(gets) != 0:
                 print('Gets:')
 
-                for i in range(len(gets)):
-                    print ('  * %s' % (gets[i]))
+                for g in gets:
+                    print ('  * %s' % (g))
 
             if len(plots) != 0:
                 print('Plots:')
 
-                for i in range(len(plots)):
-                    print ('  * %s' % (plots[i]))
+                for p in plots:
+                    print ('  * %s' % (p))
 
 def usage():
     print('Usage: datamaster.py -s <name> [-g, -p] <data name>')
@@ -261,7 +265,7 @@ def handle_args(args):
                 return
 
         elif opt in ('-p', '--plot'):
-            if plot_var(arg):
+            if plot_var(arg) and plotting is False:
                 plotting = True
 
         elif opt in ('-g', '--get'):
