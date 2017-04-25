@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
+
 #############################################################
-#
-# lab1 analysis
-#
 # 1. Imports
 #############################################################
+
 import sys, getopt
 
 import numpy as np
@@ -96,31 +95,30 @@ def power_fit(x, y, n):
     return A, x0, r
 
 #############################################################
-# 4. Lab-Specific Functions
+# 4. Data
 #############################################################
 
+wavelength_N = 50.0
+
+green_D  = (np.array([.440, .440, .447]) - np.array([.428, .428, .430])) * 10e-3 #meters
+red_D    = (np.array([.445, .445, .448]) - np.array([.428, .426, .428])) * 10e-3 #meters
+yellow_D = (np.array([.442, .446, .441]) - np.array([.427, .428, .423])) * 10e-3 #meters
+dist_err = .002 * 10e-3
+
 
 
 #############################################################
-# 5. Plotting Functions
+# 5. Lab-Specific Functions
 #############################################################
+def get_wavelength():
+    greens = 2*green_D / wavelength_N
+    g_mu = np.mean(greens)
+    sg = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(green_D))**2 )*g_mu
+    reds = 2*red_D / wavelength_N
+    r_mu = np.mean(reds)
+    sr = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(red_D))**2 )*r_mu
+    yellows = 2*yellow_D / wavelength_N
+    y_mu = np.mean(yellows)
+    sy = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(yellow_D))**2 )*y_mu
+    return ('Green: %1.3e ± %1.3e\nRed: %1.3e ± %1.3e\nYellow: %1.3e ± %1.3e' % (g_mu, sg, r_mu, sr, y_mu, sy))
 
-#############################################################
-# 6. Program Main
-#
-#    Put all the program execution code below here
-#############################################################
-
-# Handles argument parsing so we don't have to comment out different lines
-# when we want only certain outputs
-def main(argv):
-    try:
-        opts, args = getopt.getopt(argv, 'hp:g:', ['help', 'plot=', 'get='])
-    except getopt.GetoptError as err:
-        print str(err)
-        sys.exit(2)
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
-
-# @end
