@@ -102,8 +102,16 @@ wavelength_N = 50.0
 
 green_D  = (np.array([.440, .440, .447]) - np.array([.428, .428, .430])) * 10e-3 #meters
 red_D    = (np.array([.445, .445, .448]) - np.array([.428, .426, .428])) * 10e-3 #meters
-yellow_D = (np.array([.442, .446, .441]) - np.array([.427, .428, .423])) * 10e-3 #meters
-dist_err = .002 * 10e-3
+orange_D = (np.array([.442, .446, .441]) - np.array([.427, .428, .423])) * 10e-3 #meters
+dist_err = .002 * 10e-3 #meters
+
+L = .79 #meters
+dL = .01 #meters
+green_N = np.array([62.0, 57.0])
+red_N = np.array([50.0, 49.0])
+dN = 1.0
+green_lm = 510.0 * 10e-9 #meters
+red_lm = 650.0 *10e-9 #meters
 
 
 
@@ -117,8 +125,18 @@ def get_wavelength():
     reds = 2*red_D / wavelength_N
     r_mu = np.mean(reds)
     sr = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(red_D))**2 )*r_mu
-    yellows = 2*yellow_D / wavelength_N
-    y_mu = np.mean(yellows)
-    sy = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(yellow_D))**2 )*y_mu
-    return ('Green: %1.3e ± %1.3e\nRed: %1.3e ± %1.3e\nYellow: %1.3e ± %1.3e' % (g_mu, sg, r_mu, sr, y_mu, sy))
+    oranges = 2*orange_D / wavelength_N
+    o_mu = np.mean(oranges)
+    so = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(orange_D))**2 )*o_mu
+    return ('Green: %1.3e ± %1.3e\nRed: %1.3e ± %1.3e\nOrange: %1.3e ± %1.3e' % (g_mu, sg, r_mu, sr, o_mu, so))
 
+def find_refraction(N, lm):
+    n = (N*lm / (2*L)) + 1
+    return n
+
+def get_refraction():
+    gn = np.mean(find_refraction(green_N, green_lm))
+    sgn = np.sqrt( (dL/L)**2 + (dN/np.mean(green_N))**2 )*gn
+    rn = np.mean(find_refraction(red_N, red_lm))
+    srn = np.sqrt( (dL/L)**2 + (dN/np.mean(red_N))**2 )*rn
+    return('Green: %1.3f ± %1.3f\nRed: %1.3f ± %1.3f\n' % (gn, sgn, rn, srn))
