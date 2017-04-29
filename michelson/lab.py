@@ -9,14 +9,11 @@ import sympy as sp
 import matplotlib.pyplot as plt
 import math
 
-from os import path
-
 from scipy import stats
 from astropy import units as u
 from astropy import constants as const
 from matplotlib import mlab
 from matplotlib import patches
-import decimal as dec
 
 from scipy.optimize import curve_fit
 
@@ -106,13 +103,15 @@ red_D    = (np.array([.445, .445, .448]) - np.array([.428, .426, .428])) * 1e-3 
 orange_D = (np.array([.442, .446, .441]) - np.array([.427, .428, .423])) * 1e-3 #meters
 dist_err = .002 * 1e-3 #meters
 
-L = .79 #meters
-dL = .01 #meters
+L       = .079 #meters
+dL      = .001 #meters
+
 green_N = np.array([62.0, 57.0])
-red_N = np.array([50.0, 49.0])
-dN = 1.0
+red_N   = np.array([50.0, 49.0])
+dN      = 1.0
+
 green_lm = 510.0 * 1e-9 #meters
-red_lm = 650.0 *1e-9 #meters
+red_lm   = 650.0 *1e-9 #meters
 
 #############################################################
 # 5. Lab-Specific Functions
@@ -141,13 +140,23 @@ def get_wavelength():
 
     return ('Green: %1.3e ± %1.3e\nRed: %1.3e ± %1.3e\nOrange: %1.3e ± %1.3e' % (mu_g, s_g, mu_r, s_r, mu_o, s_o))
 
-def find_refraction(N, lm):
-    n = (N*lm / (2*L)) + 1
-    return n
+def find_refraction(arrN, col):
+    l, dl = compute_lambda(col)
+
+    N  = np.mean(arrN)
+    dN = np.ceil(np.std(arrN)) # Better to overestimate than under in this case
+
+    n  = ((N * l) / (2. * L)) + 1.
+    mu = np.mean(n)
+
+    s1 = (l / (2. * L)) * dN
+    s2 = ((N * l) / (2. * L**2.)) * dL
+    s3 = (N / (2. * L)) * dl
+
+    return mu, np.sqrt(s1**2 + s2**2 + s3**2.)
 
 def get_refraction():
-    gn = np.mean(find_refraction(green_N, green_lm))
-    sgn = np.sqrt( (dL/L)**2 + (dN/np.mean(green_N))**2 )*gn
-    rn = np.mean(find_refraction(red_N, red_lm))
-    srn = np.sqrt( (dL/L)**2 + (dN/np.mean(red_N))**2 )*rn
+    gn, sgn = find_refraction(green_N, green_D)
+    rn, srn = find_refraction(red_N, red_D)
+    
     return('Green: %1.6f ± %1.3e\nRed: %1.6f ± %1.3e\n' % (gn, sgn, rn, srn))
