@@ -4,15 +4,16 @@
 # 1. Imports
 #############################################################
 
-import sys, getopt
-
 import numpy as np
+import sympy as sp
 import matplotlib.pyplot as plt
+import math
+
+from os import path
 
 from scipy import stats
 from astropy import units as u
 from astropy import constants as const
-from sympy import *
 from matplotlib import mlab
 from matplotlib import patches
 import decimal as dec
@@ -20,7 +21,7 @@ import decimal as dec
 from scipy.optimize import curve_fit
 
 # Allows LaTeX output in Jupyter and in matplotlib
-init_printing(use_latex=True, use_unicode=True)
+sp.init_printing(use_latex=True, use_unicode=True)
 
 #############################################################
 # 2. Constants
@@ -100,35 +101,45 @@ def power_fit(x, y, n):
 
 wavelength_N = 50.0
 
-green_D  = (np.array([.440, .440, .447]) - np.array([.428, .428, .430])) * 10e-3 #meters
-red_D    = (np.array([.445, .445, .448]) - np.array([.428, .426, .428])) * 10e-3 #meters
-orange_D = (np.array([.442, .446, .441]) - np.array([.427, .428, .423])) * 10e-3 #meters
-dist_err = .002 * 10e-3 #meters
+green_D  = (np.array([.440, .440, .447]) - np.array([.428, .428, .430])) * 1e-3 #meters
+red_D    = (np.array([.445, .445, .448]) - np.array([.428, .426, .428])) * 1e-3 #meters
+orange_D = (np.array([.442, .446, .441]) - np.array([.427, .428, .423])) * 1e-3 #meters
+dist_err = .002 * 1e-3 #meters
 
 L = .79 #meters
 dL = .01 #meters
 green_N = np.array([62.0, 57.0])
 red_N = np.array([50.0, 49.0])
 dN = 1.0
-green_lm = 510.0 * 10e-9 #meters
-red_lm = 650.0 *10e-9 #meters
-
-
+green_lm = 510.0 * 1e-9 #meters
+red_lm = 650.0 *1e-9 #meters
 
 #############################################################
 # 5. Lab-Specific Functions
 #############################################################
+
+def compute_lambda(arr):
+    N   = wavelength_N
+
+    col = (2. * arr) / N
+
+    mu = np.mean(col)
+    sl = np.std(col)
+
+    # s1 = np.sqrt(N**(-2.) + (dist_err/np.mean(arr))**2 ) * mu
+    # I still don't think this accounts for enough error; this does not include
+    # the instability of the air table as the micrometer was being pushed.
+    # It would be much more safe to use the deviation as a measurement of uncertainty.
+
+    return mu, sl
+
 def get_wavelength():
-    greens = 2*green_D / wavelength_N
-    g_mu = np.mean(greens)
-    sg = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(green_D))**2 )*g_mu
-    reds = 2*red_D / wavelength_N
-    r_mu = np.mean(reds)
-    sr = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(red_D))**2 )*r_mu
-    oranges = 2*orange_D / wavelength_N
-    o_mu = np.mean(oranges)
-    so = np.sqrt( (1./50.0)**2 + (dist_err/np.mean(orange_D))**2 )*o_mu
-    return ('Green: %1.3e ± %1.3e\nRed: %1.3e ± %1.3e\nOrange: %1.3e ± %1.3e' % (g_mu, sg, r_mu, sr, o_mu, so))
+
+    mu_g, s_g = compute_lambda(green_D)
+    mu_r, s_r = compute_lambda(red_D)
+    mu_o, s_o = compute_lambda(orange_D)
+
+    return ('Green: %1.3e ± %1.3e\nRed: %1.3e ± %1.3e\nOrange: %1.3e ± %1.3e' % (mu_g, s_g, mu_r, s_r, mu_o, s_o))
 
 def find_refraction(N, lm):
     n = (N*lm / (2*L)) + 1
@@ -139,4 +150,4 @@ def get_refraction():
     sgn = np.sqrt( (dL/L)**2 + (dN/np.mean(green_N))**2 )*gn
     rn = np.mean(find_refraction(red_N, red_lm))
     srn = np.sqrt( (dL/L)**2 + (dN/np.mean(red_N))**2 )*rn
-    return('Green: %1.3f ± %1.3f\nRed: %1.3f ± %1.3f\n' % (gn, sgn, rn, srn))
+    return('Green: %1.6f ± %1.3e\nRed: %1.6f ± %1.3e\n' % (gn, sgn, rn, srn))
