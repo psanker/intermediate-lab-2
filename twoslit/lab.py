@@ -93,6 +93,25 @@ def lsq(x, y):
     # y = mx + b; r is correlation
     return m, b, sy, sm, sb, r
 
+def mc_integrate(f, xmin, xmax, N=10000, seed=-1):
+    '''
+    Monte-Carlo integrator for distribution functions
+    '''
+
+    if seed != -1:
+        np.random.seed(seed)
+
+    samples = np.random.uniform(low=xmin, high=xmax, size=N)
+    values  = np.empty(N)
+
+    R  = xmax - xmin
+    dx = R / float(N)
+
+    values = f(samples)
+    s_int  = (R / np.sqrt(N)) * np.std(values, ddof=1)
+
+    return np.sum(values)*dx, s_int
+
 #############################################################
 # 4. Data
 #############################################################
@@ -118,10 +137,85 @@ pos_single = np.linspace(4.25, 6.25, num=len(counts_single1))
 
 bg_bulb = np.array([.022, .019, .024, .024, .02, .026, .018, .018, .019, .018, .029, .020, .018, .019, .02, .029])
 
+# Analysis info for Patrick
+data_a = .29e-3
+data_d = 1.45e-3
+data_k = TWO_PI / (670e-9)
+
+SEED   = 912837438 # a random-ish number that fixes the integrator to produce self-consistent information
+
 #############################################################
 # 5. Lab-specific functions
 #############################################################
 
+# Unnormalized probability distribution for double-slit
+def p(t, a=data_a, d=data_d, k=data_k):
+    ret = np.zeros(len(t))
+    c1 = 1.
+
+    for i in range(len(ret)):
+        alp = (k * a * np.sin(t[i])) / 2.
+
+        c2 = (np.sin(alp) / alp)**2.
+        c3 = (np.cos((k * d * np.sin(t[i])) / 2.))**2.
+
+        if alp == 0.0:
+            ret[i] = 2. * c1 * c3
+        else:
+            ret[i] = c1 * c2 * c3
+
+    return ret
+
+# Unnormalized probability distribution for single-slit
+def env(t, a=data_a, d=data_d, k=data_k):
+    ret = np.zeros(len(t))
+    c1 = 1.
+
+    for i in range(len(ret)):
+        alp = (k * a * np.sin(t[i])) / 2.
+
+        c2 = (np.sin(alp) / alp)**2.
+
+        if alp == 0.0:
+            ret[i] = 2. * c1
+        else:
+            ret[i] = c1 * c2
+
+    return ret
+
+def norms(size=1000000):
+    n1, dn1 = mc_integrate(p, -PI, PI, size, seed=SEED)
+    n2, dn2 = mc_integrate(env, -PI, PI, size, seed=SEED)
+
+    return n1, dn1, n2, dn2
+
+def get_normfactors():
+    n1, dn1, n2, dn2 = norms()
+
+    # Norm factor for double-slit
+    str1 = '%1.3e ± %1.3e' % (n1, dn1)
+
+    # Norm factor for single-slit
+    str2 = '%1.3e ± %1.3e' % (n2, dn2)
+
+    # Ratio of normalizing factors i.e. the max amplitudes
+    q   = n2 / n1
+    s2q = (dn2 / n2)**2 + (dn1 / n1)**2
+
+    str3 = '%1.3f ± %1.3e' % (q, np.sqrt(s2q))
+
+    return 'Double (N1): %s\nSingle (N2): %s\nN1/N2: %s' % (str1, str2, str3)
+
+def get_normcheck():
+    n1, dn1, n2, dn2 = norms()
+
+    v1, dv1 = mc_integrate(lambda x: (1 / n1) * p(x), -PI, PI, 1000000, seed=SEED)
+    v2, dv2 = mc_integrate(lambda x: (1 / n2) * env(x), -PI, PI, 1000000, seed=SEED)
+
+    str1 = '%1.3f ± %1.3e' % (v1, dv1)
+    str2 = '%1.3f ± %1.3e' % (v2, dv2)
+
+    return 'Norm test\n-----\nDouble: %s\nSingle: %s' % (str1, str2)
 
 #Laser Source
 def get_singlemaxleft():
@@ -153,6 +247,27 @@ def get_singlemaxright():
     drp = np.std(rp)
 
     return np.array([mu_ri, dri, mu_rp, drp])
+
+def get_ratio():
+    doub  = get_doublemax()
+    singl = get_singlemaxleft()
+    singr = get_singlemaxright()
+
+    r = np.array([doub[0] / singl[0], doub[0] / singr[0]])
+
+    return np.mean(r), np.std(r)
+
+def plot_inttheory():
+    n1, dn1, n2, dn2 = norms()
+    t = np.linspace(-.002*PI, .002*PI, 10000)
+
+    plt.figure()
+    plt.plot(t, (1 / n1)*p(t), label='Double Slit', alpha=0.5)
+    plt.plot(t, (1 / n2)*env(t), label='Single Slit')
+
+    plt.xlabel('Angle ($rad$)')
+    plt.ylabel('Probability Density')
+    plt.legend(loc='upper left')
 
 def get_doublemax():
     '''
@@ -223,9 +338,9 @@ def plot_bulb():
     '''
     BG, dBG = get_background()
     plt.figure()
-    plt.plot(pos_double, counts_double - BG, '.b-', alpha=0.7, label='Two Slit Intensity')
-    plt.plot(pos_single, counts_single1 - BG, '.g-', alpha=0.7, label='Left Single Slit Intensity')
-    plt.plot(pos_single, counts_single2 - BG, '.m-', alpha=0.7, label='Right Single Slit Intensity')
+    plt.plot(pos_double, (counts_double - BG), '.b-', alpha=0.7, label='Two Slit Intensity')
+    plt.plot(pos_single, (counts_single1 - BG), '.g-', alpha=0.7, label='Left Single Slit Intensity')
+    plt.plot(pos_single, (counts_single2 - BG), '.m-', alpha=0.7, label='Right Single Slit Intensity')
     plt.legend(loc='upper right')
     plt.xlabel('Detector Position ($mm$)')
     plt.ylabel('Intensity ($V$)')
