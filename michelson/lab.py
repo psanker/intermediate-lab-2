@@ -159,4 +159,4 @@ def get_refraction():
     gn, sgn = find_refraction(green_N, green_D)
     rn, srn = find_refraction(red_N, red_D)
 
-    return('Green: %1.6f ± %1.3e\nRed: %1.6f ± %1.3e\n' % (gn, sgn, rn, srn))
+    return('Green: %1.6f ± %1.6f\nRed: %1.6f ± %1.6f\n' % (gn, sgn, rn, srn))
