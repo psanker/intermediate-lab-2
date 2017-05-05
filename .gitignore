@@ -146,3 +146,6 @@ ENV/
 *.fdb_latexmk
 *.pdf
 *.aux
+
+# Illustrator documents
+*.ai

@@ -8,6 +8,7 @@ import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
 import math
+import numba
 
 from os import path
 
@@ -116,7 +117,6 @@ def mc_integrate(f, xmin, xmax, N=10000, seed=-1):
 # 4. Data
 #############################################################
 
-
 #Laser Source
 
 bg_laser = .007 #background voltage
@@ -149,6 +149,7 @@ SEED   = 912837438 # a random-ish number that fixes the integrator to produce se
 #############################################################
 
 # Unnormalized probability distribution for double-slit
+@numba.jit
 def p(t, a=data_a, d=data_d, k=data_k):
     ret = np.zeros(len(t))
     c1 = 1.
@@ -167,6 +168,7 @@ def p(t, a=data_a, d=data_d, k=data_k):
     return ret
 
 # Unnormalized probability distribution for single-slit
+@numba.jit
 def env(t, a=data_a, d=data_d, k=data_k):
     ret = np.zeros(len(t))
     c1 = 1.
@@ -263,7 +265,7 @@ def plot_inttheory():
 
     plt.figure()
     plt.plot(t, (1 / n1)*p(t), label='Double Slit', alpha=0.5)
-    plt.plot(t, (1 / n2)*env(t), label='Single Slit')
+    plt.plot(t, (1 / n2)*env(t), label='Single Slit', color='r')
 
     plt.xlabel('Angle ($rad$)')
     plt.ylabel('Probability Density')

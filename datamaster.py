@@ -26,6 +26,8 @@ LABS         = []   # List of all known labs given by subdirectories
 current_labs = {}   # Key-value memory of active labs
 selected_lab = None # Name of current selected lab; used for reloads
 
+VERSION      = '1.1.0' # Current version of DataMaster
+
 def fetch_lab(name, load):
     '''
     * Internal *
@@ -165,6 +167,25 @@ def get_var(var):
         print('No selected lab')
         usage()
 
+def run_func(var):
+    if selected_lab is not None:
+        obj = current_labs[selected_lab]
+
+        if str(var) == 'all': # Are you sure about that?
+
+            for e in dir(obj.lab):
+                if e.startswith('run_') and callable(getattr(obj.lab, str(e))):
+                    getattr(obj.lab, str(e))()
+            return
+
+        try:
+            getattr(obj.lab, ('run_%s' % (var)))()
+        except Exception as err:
+            print(str(err))
+    else:
+        print('No selected lab')
+        usage()
+
 def list():
     print('Available labs:')
 
@@ -179,12 +200,15 @@ def list():
 
         gets  = []
         plots = []
+        runs  = []
 
         for e in dir(obj.lab):
             if e.startswith('get_') and callable(getattr(obj.lab, str(e))):
                 gets.append(str(e).replace('get_', ''))
             elif e.startswith('plot_') and callable(getattr(obj.lab, str(e))):
                 plots.append(str(e).replace('plot_', ''))
+            elif e.startswith('run_') and callable(getattr(obj.lab, str(e))):
+                runs.append(str(e).replace('execute_', ''))
 
         if len(gets) != 0 or len(plots) != 0:
             print('----------------------------------')
@@ -202,14 +226,25 @@ def list():
                 for p in plots:
                     print ('  * %s' % (p))
 
+            if len(runs) != 0:
+                print('Runnables:')
+
+                for r in runs:
+                    print ('  * %s' % (r))
+
+def current_version():
+    print('DataMaster version %s' % VERSION)
+
 def usage():
+    current_version()
     print('Usage: datamaster.py -s <name> [-g, -p] <data name>')
     print('\nCommands:\n  -h, --help: Prints out this help section')
     print('  -l, --list: Lists all the available labs and, if a lab is selected, all available gets and plots')
     print('  -s, --select <name>: Selects lab to compute data from')
     print('  -r, --reload: Reloads the selected lab from file')
-    print('  -p, --plot <variable>: Calls a plotting function of form \"plot_<variable>\"')
-    print('  -g, --get <variable>: Prints out a value from function of form \"get_<variable>\"')
+    print('  -p, --plot <variable>: Calls a plotting function of the form \"plot_<variable>\"')
+    print('  -g, --get <variable>: Prints out a value from function of the form \"get_<variable>\"')
+    print('  -x, --run <variable>: Runs a custom function of the form \"run_<variable>\"')
     print('  -e, --exit: Explicit command to exit from DataMaster CLI')
 
 def cli():
@@ -237,7 +272,7 @@ def exit_handle(sig, frame):
 
 def handle_args(args):
     try:
-        opts, args = getopt.getopt(args, 'hls:rp:g:e', ['help', 'list', 'reload', 'select=', 'plot=', 'get=', 'exit'])
+        opts, args = getopt.getopt(args, 'hlvs:rp:g:x:e', ['help', 'list', 'version', 'reload', 'select=', 'plot=', 'get=', 'run=', 'exit'])
     except getopt.GetoptError as err:
         print(str(err))
         usage()
@@ -252,6 +287,10 @@ def handle_args(args):
 
         elif opt in ('-l', '--list'):
             list()
+            return
+
+        elif opt in ('-v', '--version'):
+            current_version()
             return
 
         elif opt in ('-s', '--select'):
@@ -270,6 +309,9 @@ def handle_args(args):
 
         elif opt in ('-g', '--get'):
             get_var(arg)
+
+        elif opt in ('-x', '--run'):
+            run_func(arg)
 
         elif opt in ('-e', '--exit'):
             print('\nExiting...')
@@ -290,8 +332,8 @@ def main(argv):
         # register sigkill event and start looping CLI
         signal.signal(signal.SIGINT, exit_handle)
         cli()
-
-    handle_args(argv)
+    else:
+        handle_args(argv)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
