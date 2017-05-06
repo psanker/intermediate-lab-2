@@ -67,7 +67,7 @@ data_L = 0.0001
 @jit
 def coeff(N, L):
     ret   = np.empty(N)
-    sqrt2 = np.sqrt(2)
+    sqrt2 = np.sqrt(2) / PI
 
     for n in np.arange(1, N + 1):
         if n == 2:
