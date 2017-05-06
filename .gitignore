@@ -149,3 +149,6 @@ ENV/
 
 # Illustrator documents
 *.ai
+
+# Video
+*.mp4

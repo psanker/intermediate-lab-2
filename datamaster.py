@@ -208,9 +208,9 @@ def list():
             elif e.startswith('plot_') and callable(getattr(obj.lab, str(e))):
                 plots.append(str(e).replace('plot_', ''))
             elif e.startswith('run_') and callable(getattr(obj.lab, str(e))):
-                runs.append(str(e).replace('execute_', ''))
+                runs.append(str(e).replace('run_', ''))
 
-        if len(gets) != 0 or len(plots) != 0:
+        if len(gets) != 0 or len(plots) != 0 or len(runs) != 0:
             print('----------------------------------')
             print('Functions for \'%s\'' % (selected_lab))
 
