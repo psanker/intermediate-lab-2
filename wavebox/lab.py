@@ -56,7 +56,7 @@ R_H  = 2.18e-18 * u.J
 # 4. Data
 #############################################################
 
-data_N = 30
+data_N = 60
 data_m = m_e.value
 data_L = 0.1e-3
 
@@ -141,9 +141,7 @@ def psi_T(t, x, N, L, m):
     return ret
 
 @jit
-def probability(t, x, n=20, l=5, m=m_e.value):
-    wav = psi_T(t, x, n, l, m)
-
+def probability(wav):
     return np.real(np.multiply(np.conjugate(wav), wav))
 
 def progress_meter(per):
@@ -169,15 +167,23 @@ def run_animate():
         os.makedirs(cache)
 
     X = np.linspace(0, 2. * data_L, 1000)
-    T = np.linspace(0, 2., 200)
+    T = np.linspace(0, 200e-6, 500)
 
+    # Firstly, generate the coefficients
+    an = coeff(data_N, data_L)
+
+    # Now draw the frames
     print('Frames:')
-
     for i in range(len(T)):
         sys.stdout.write('\r%s' % (progress_meter(float(i) / float(len(T)))))
 
+        # Get wavefunction
+        wav  = psi_T(T[i], X, data_N, data_L, data_m)
+        prob = probability(wav)
+
+        # Draw
         plt.figure()
-        plt.plot(X, probability(T[i], X, n=data_N, l=data_L, m=data_m))
+        plt.plot(X, prob)
 
         plt.ylim(0, 2e21)
 
