@@ -17,6 +17,7 @@ from astropy import units as u
 from astropy import constants as const
 
 from matplotlib import animation
+import matplotlib.ticker as mtick
 from mpl_toolkits.mplot3d import Axes3D
 
 from numba import jit
@@ -51,6 +52,26 @@ m_e  = const.m_e
 m_n  = const.m_n
 m_p  = const.m_p
 R_H  = 2.18e-18 * u.J
+
+#############################################################
+# 3. General Functions
+#############################################################
+
+def progress_meter(per, LEN=50):
+    val = per * LEN
+
+    bar = '['
+
+    for i in range(LEN):
+        if i <= val:
+            bar += '#'
+        else:
+            bar += '_'
+
+    if per * 100. == 100.:
+        return (bar + '] %2.0f%%\n' % (per * 100))
+    else:
+        return (bar + '] %2.0f%%' % (per * 100))
 
 #############################################################
 # 4. Data
@@ -108,13 +129,6 @@ def basis(x, N, L):
     return ret
 
 @jit
-def build_psi(x, N, L):
-    c   = coeff(N, L)
-    b   = basis(x, N, L)
-
-    return np.multiply(c, b)
-
-@jit
 def psi(x, N, L):
     ret = np.empty(len(x))
 
@@ -142,36 +156,101 @@ def psi_T(t, x, N, L, m):
 
 @jit
 def probability(wav):
-    return np.real(np.multiply(np.conjugate(wav), wav))
+    p = np.real(np.multiply(np.conjugate(wav), wav))
+    return p / np.sum(p)
 
-def progress_meter(per):
-    LEN = 50
-    val = per * LEN
+# Interactivity below here ---------
 
-    bar = '['
+def get_coeff():
+    return coeff(data_N, data_L)
 
-    for i in range(LEN):
-        if i <= val:
-            bar += '#'
-        else:
-            bar += '_'
-
-    return (bar + '] %2.0f%%' % (per * 100))
-
-def plot_probspec():
+# Check the probability normalization condition
+def get_probcheck():
     an    = coeff(data_N, data_L)
-    power = np.empty(len(an))
+    spec = np.empty(len(an))
 
     for i in range(len(an)):
-        power[i] = an[i]**(2.)
+        spec[i] = an[i]**(2.)
+
+    return np.sum(spec)
+
+# Show which eigenstates show up
+def plot_probspec():
+    an    = coeff(data_N, data_L)
+    spec = np.empty(len(an))
+
+    for i in range(len(an)):
+        spec[i] = an[i]**(2.)
 
     plt.figure()
 
     n = np.arange(1, data_N + 1)
     plt.plot(n, power, 'ro')
 
-def get_coeff():
-    return coeff(data_N, data_L)
+def plot_expvalue():
+    X = np.linspace(0, 2. * data_L, 1000)
+    T = np.linspace(0, 200e-6, 500)
+
+    expect = np.empty(len(T))
+
+    # Firstly, generate the coefficients
+    an = coeff(data_N, data_L)
+
+    # Now draw the frames
+    print('Building...')
+    for i in range(len(T)):
+        sys.stdout.write('\r%s' % (progress_meter(float(i) / float(len(T)))))
+
+        # Get wavefunction
+        wav  = psi_T(T[i], X, data_N, data_L, data_m)
+        prob = probability(wav)
+
+        expect[i] = np.sum(np.multiply(X, prob))
+
+    print('') #dummy spacer
+    fig, ax = plt.subplots()
+
+    ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
+    ax.yaxis.get_major_formatter().set_powerlimits((0, 1))
+
+    ax.plot(T, expect, 'r-')
+
+    plt.xlabel('Time ($s$)')
+    plt.ylabel('Position ($m$)')
+
+def plot_deviation():
+    X = np.linspace(0, 2. * data_L, 1000)
+    T = np.linspace(0, 200e-6, 500)
+
+    dev = np.empty(len(T))
+
+    # Firstly, generate the coefficients
+    an = coeff(data_N, data_L)
+
+    # Now draw the frames
+    print('Building...')
+    for i in range(len(T)):
+        sys.stdout.write('\r%s' % (progress_meter(float(i) / float(len(T)))))
+
+        # Get wavefunction
+        wav  = psi_T(T[i], X, data_N, data_L, data_m)
+        prob = probability(wav)
+
+        exp  = np.sum(np.multiply(X, prob))
+        exp2 = np.sum(np.multiply(X**2., prob))
+
+        dev[i] = np.sqrt(exp2 - exp**(2.))
+
+    print('') #dummy spacer
+    fig, ax = plt.subplots()
+
+    ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
+    ax.yaxis.get_major_formatter().set_powerlimits((0, 1))
+
+    ax.plot(T, dev, 'r-')
+
+    plt.xlabel('Time ($s$)')
+    plt.ylabel('Uncertainty ($m$)')
 
 def run_animate():
     # Create cache directory
@@ -197,10 +276,13 @@ def run_animate():
         prob = probability(wav)
 
         # Draw
-        plt.figure()
-        plt.plot(X, prob)
+        fig, ax = plt.subplots()
 
-        plt.ylim(0, 2e21)
+        ax.xaxis.get_major_formatter().set_powerlimits((0, 1))
+        ax.yaxis.get_major_formatter().set_powerlimits((0, 1))
+
+        ax.plot(X, prob)
+        plt.ylim(0, 5e-3)
 
         plt.xlabel('$x$')
         plt.ylabel('$\\mathcal{P}(x)$')
@@ -212,7 +294,6 @@ def run_animate():
     os.system('ffmpeg -framerate 100 -pattern_type glob -i \'%s/*.png\' -c:v libx264 -pix_fmt yuv420p -preset slower %s/output.mp4' % (cache, directory))
 
     print('Cleanup:')
-
     shutil.rmtree(cache)
 
     print('Done')
