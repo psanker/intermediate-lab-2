@@ -58,7 +58,7 @@ R_H  = 2.18e-18 * u.J
 
 data_N = 30
 data_m = m_e.value
-data_L = 0.0001
+data_L = 0.1e-3
 
 #############################################################
 # 5. Lab-Specific Functions
@@ -171,18 +171,24 @@ def run_animate():
     X = np.linspace(0, 2. * data_L, 1000)
     T = np.linspace(0, 2., 200)
 
-    print('Graphs:')
+    print('Frames:')
 
     for i in range(len(T)):
         sys.stdout.write('\r%s' % (progress_meter(float(i) / float(len(T)))))
 
         plt.figure()
         plt.plot(X, probability(T[i], X, n=data_N, l=data_L, m=data_m))
+
+        plt.ylim(0, 2e21)
+
+        plt.xlabel('$x$')
+        plt.ylabel('$\\mathcal{P}(x)$')
+
         plt.savefig('%s/%d.png' % (cache, i))
         plt.close()
 
     print('\nVideo: ')
-    os.system('ffmpeg -framerate 100 -pattern_type glob -i \'%s/*.png\' -c:v libx264 -pix_fmt yuv420p %s/output.mp4' % (cache, directory))
+    os.system('ffmpeg -framerate 100 -pattern_type glob -i \'%s/*.png\' -c:v libx264 -pix_fmt yuv420p -preset slower %s/output.mp4' % (cache, directory))
 
     print('Cleanup:')
 
