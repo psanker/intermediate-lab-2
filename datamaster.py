@@ -322,6 +322,7 @@ def handle_args(args):
 
     if plotting:
         plt.show()
+        plt.close('all')
 
 def main(argv):
     # Load in lab names
