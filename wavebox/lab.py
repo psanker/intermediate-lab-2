@@ -56,7 +56,7 @@ R_H  = 2.18e-18 * u.J
 # 4. Data
 #############################################################
 
-data_N = 60
+data_N = 20
 data_m = m_e.value
 data_L = 0.1e-3
 
@@ -157,6 +157,21 @@ def progress_meter(per):
             bar += '_'
 
     return (bar + '] %2.0f%%' % (per * 100))
+
+def plot_probspec():
+    an    = coeff(data_N, data_L)
+    power = np.empty(len(an))
+
+    for i in range(len(an)):
+        power[i] = an[i]**(2.)
+
+    plt.figure()
+
+    n = np.arange(1, data_N + 1)
+    plt.plot(n, power, 'ro')
+
+def get_coeff():
+    return coeff(data_N, data_L)
 
 def run_animate():
     # Create cache directory
